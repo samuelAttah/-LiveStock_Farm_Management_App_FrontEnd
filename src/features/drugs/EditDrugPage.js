@@ -5,20 +5,41 @@ import { useGetDrugsQuery, useUpdateDrugMutation } from "./drugsApiSlice";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const EditDrugPage = () => {
   const { batchId, drugId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
-  const { drug } = useGetDrugsQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      drug: data?.entities[drugId],
+  const {
+    drug = {},
+    isError: isDrugError,
+    isLoading: isDrugLoading,
+    isSuccess: isDrugSuccess,
+    error: drugError,
+  } = useGetDrugsQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      drug: data?.entities[drugId] ?? {},
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
@@ -43,10 +64,10 @@ const EditDrugPage = () => {
   ].every(Boolean);
 
   useEffect(() => {
-    if (drug) {
+    if (Object.keys(drug).length) {
       setFormData({
         drugName: drug.drugName,
-        cost: Number(Object.values(drug.cost)[0]),
+        cost: Number(Object.values(drug?.cost)[0]),
         purchaseReason: drug.purchaseReason,
       });
 
@@ -97,20 +118,57 @@ const EditDrugPage = () => {
     }
   };
 
-  return batch?.isActive ? (
-    <EditDrugPageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      datePurchased={datePurchased}
-      setDatePurchased={setDatePurchased}
-      batch={batch}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can not be Updated</p>
+  return (
+    <>
+      {!isBatchLoading &&
+      isBatchSuccess &&
+      !isDrugLoading &&
+      isDrugSuccess &&
+      Object.keys(batch)?.length &&
+      Object.keys(drug)?.length &&
+      batch?.isActive ? (
+        <EditDrugPageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          datePurchased={datePurchased}
+          setDatePurchased={setDatePurchased}
+          batch={batch}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {!isBatchLoading &&
+      isBatchSuccess &&
+      !isDrugLoading &&
+      isDrugSuccess &&
+      Object.keys(batch)?.length &&
+      Object.keys(drug)?.length &&
+      !batch?.isActive ? (
+        <p>Inactive Batches Can't be Updated</p>
+      ) : null}
+
+      {!isBatchLoading &&
+      isBatchSuccess &&
+      !isDrugLoading &&
+      isDrugSuccess &&
+      Object.keys(batch)?.length &&
+      !Object.keys(drug)?.length ? (
+        <p>Drug Does not Exist</p>
+      ) : null}
+
+      {isBatchLoading || isDrugLoading ? <PulseLoader color="green" /> : null}
+
+      {!isBatchLoading && !isDrugLoading && isDrugError ? (
+        <p>{drugError?.data?.message}</p>
+      ) : null}
+
+      {!isBatchLoading && !isDrugLoading && isBatchError ? (
+        <p>{batchError?.data?.message}</p>
+      ) : null}
+    </>
   );
 };
 

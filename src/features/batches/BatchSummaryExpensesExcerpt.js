@@ -12,6 +12,7 @@ const BatchSummaryExpensesExcerpt = ({
   formattedTotalAmountSpentOnHousings,
   numberOfTimesOtherExpense,
   formattedTotalAmountSpentOnOtherExpenses,
+  formattedTotalBatchExpenses,
 }) => {
   return (
     <>
@@ -131,6 +132,24 @@ const BatchSummaryExpensesExcerpt = ({
             </Typography>
             <Typography ml={1} textAlign="left">
               {formattedTotalAmountSpentOnOtherExpenses}
+            </Typography>
+          </Box>
+        </Grid>
+      </Grid>
+      <Grid container spacing={1} mb={1}>
+        <Grid item xs={12} md={12}>
+          <Box display="flex" flexDirection="row-reverse" alignItems={"center"}>
+            <Typography
+              ml={1}
+              textAlign="left"
+              fontWeight="bold"
+              fontSize={20}
+              color={"error.main"}
+            >
+              {formattedTotalBatchExpenses}
+            </Typography>
+            <Typography fontWeight="bold" textAlign="left" color={"error.main"}>
+              Total Amount of All Expenses:
             </Typography>
           </Box>
         </Grid>

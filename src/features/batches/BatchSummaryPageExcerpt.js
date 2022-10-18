@@ -5,8 +5,12 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import grey from "@mui/material/colors/grey";
 import BatchSummaryExpensesExcerpt from "./BatchSummaryExpensesExcerpt";
-
 import BatchSummaryDescriptionExcerpt from "./BatchSummaryDescriptionExcerpt";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import BatchSummaryPDFfile from "./BatchSummaryPDFfile";
+import CardMedia from "@mui/material/CardMedia";
+import blue from "@mui/material/colors/blue";
+
 const BatchSummaryPageExcerpt = ({
   batch,
   totalDeadAnimals,
@@ -28,12 +32,44 @@ const BatchSummaryPageExcerpt = ({
   formattedTotalIncomeGeneratedFromOtherSales,
   formattedTotalBatchExpenses,
   formattedTotalBatchRevenues,
-  totalBatchExpenses,
-  totalBatchRevenues,
+  profitOrLoss,
+  formattedProfitOrLoss,
+  singleUserDetail,
 }) => {
   return (
     <>
       <Container component="main" maxWidth="md">
+        <Grid
+          container
+          spacing={1}
+          display="flex"
+          justifyContent={"space-between"}
+          alignItems="center"
+        >
+          <Grid item xs={6} md={6}>
+            <Typography
+              textAlign="left"
+              fontSize={17}
+              fontWeight="bold"
+              color={blue[500]}
+            >
+              {singleUserDetail?.farmName ?? "Update Farm Name"}
+            </Typography>
+          </Grid>
+          <Grid item xs={3} md={3}>
+            {singleUserDetail?.companyLogo ? (
+              <CardMedia
+                component="img"
+                height="60"
+                width="60"
+                image={singleUserDetail?.companyLogo}
+                alt="company picture"
+              />
+            ) : (
+              <Typography>Update Farm/Company Logo</Typography>
+            )}
+          </Grid>
+        </Grid>
         <Typography component="h5" variant="h5" sx={{ mt: 2 }} color="gray">
           {`${batch?.batchTitle} Summary`}
         </Typography>
@@ -59,8 +95,9 @@ const BatchSummaryPageExcerpt = ({
             formattedTotalAmountSpentOnOtherExpenses
           }
           formattedTotalBatchExpenses={formattedTotalBatchExpenses}
-          totalBatchExpenses={totalBatchExpenses}
         />
+
+        <hr />
 
         <Typography
           color="primary.main"
@@ -73,7 +110,7 @@ const BatchSummaryPageExcerpt = ({
         </Typography>
         <Grid item md={12} xs={12} lg={12} mb={0}>
           <Typography textAlign="left" color={grey[700]} mb={0}>
-            Sales of Batch Animals:
+            Sales of Animals:
           </Typography>
         </Grid>
         <hr />
@@ -140,15 +177,163 @@ const BatchSummaryPageExcerpt = ({
             </Box>
           </Grid>
         </Grid>
+        <Grid container spacing={1} mb={1}>
+          <Grid item xs={12} md={12}>
+            <Box
+              display="flex"
+              flexDirection="row-reverse"
+              alignItems={"center"}
+            >
+              <Typography
+                ml={1}
+                textAlign="left"
+                fontWeight="bold"
+                fontSize={20}
+                color={"primary.main"}
+              >
+                {formattedTotalBatchRevenues}
+              </Typography>
+              <Typography
+                fontWeight="bold"
+                textAlign="left"
+                color={"primary.main"}
+              >
+                Total Amount of All Revenues:
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+        <Grid container spacing={1} my={2}>
+          <Grid item xs={12} md={12}>
+            <Box
+              display="flex"
+              flexDirection="row"
+              justifyContent={"space-between"}
+              alignItems={"center"}
+            >
+              {profitOrLoss >= 0 ? (
+                <Typography
+                  fontWeight="bold"
+                  textAlign="left"
+                  color={"primary.main"}
+                >
+                  Total Profit:
+                </Typography>
+              ) : (
+                <Typography
+                  fontWeight="bold"
+                  textAlign="left"
+                  color={"error.main"}
+                >
+                  Total Loss:
+                </Typography>
+              )}
+              {profitOrLoss > 0 ? (
+                <Typography
+                  ml={1}
+                  textAlign="left"
+                  fontWeight="bold"
+                  fontSize={20}
+                  color={"primary.main"}
+                >
+                  {formattedProfitOrLoss}
+                </Typography>
+              ) : profitOrLoss < 0 ? (
+                <Typography
+                  ml={1}
+                  textAlign="left"
+                  fontWeight="bold"
+                  fontSize={20}
+                  color={"error.main"}
+                >
+                  {formattedProfitOrLoss}
+                </Typography>
+              ) : (
+                <Typography
+                  ml={1}
+                  textAlign="left"
+                  fontWeight="bold"
+                  fontSize={20}
+                >
+                  {formattedProfitOrLoss}
+                </Typography>
+              )}
+            </Box>
+          </Grid>
+        </Grid>
 
-        <Button
+        {/* <Button
           type="submit"
           fullWidth
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
         >
           Print
-        </Button>
+        </Button> */}
+        <PDFDownloadLink
+          document={
+            <BatchSummaryPDFfile
+              stateBatch={batch}
+              costPerUnit={costPerUnit}
+              totalDeadAnimals={totalDeadAnimals}
+              totalPurchaseCost={totalPurchaseCost}
+              numberOfTimesFeedExpense={numberOfTimesFeedExpense}
+              formattedTotalAmountSpentOnFeeds={
+                formattedTotalAmountSpentOnFeeds
+              }
+              numberOfTimesDrugExpense={numberOfTimesDrugExpense}
+              formattedTotalAmountSpentOnDrugs={
+                formattedTotalAmountSpentOnDrugs
+              }
+              numberOfTimesHousingExpense={numberOfTimesHousingExpense}
+              formattedTotalAmountSpentOnHousings={
+                formattedTotalAmountSpentOnHousings
+              }
+              numberOfTimesOtherExpense={numberOfTimesOtherExpense}
+              formattedTotalAmountSpentOnOtherExpenses={
+                formattedTotalAmountSpentOnOtherExpenses
+              }
+              numberOfTimesAnimalsWereSold={numberOfTimesAnimalsWereSold}
+              totalNumberOfAnimalsSold={totalNumberOfAnimalsSold}
+              formattedTotalIncomeGeneratedFromAnimalSales={
+                formattedTotalIncomeGeneratedFromAnimalSales
+              }
+              numberOfTimesOtherItemsWereSold={numberOfTimesOtherItemsWereSold}
+              formattedTotalIncomeGeneratedFromOtherSales={
+                formattedTotalIncomeGeneratedFromOtherSales
+              }
+              formattedTotalBatchExpenses={formattedTotalBatchExpenses}
+              formattedTotalBatchRevenues={formattedTotalBatchRevenues}
+              profitOrLoss={profitOrLoss}
+              formattedProfitOrLoss={formattedProfitOrLoss}
+              singleUserDetail={singleUserDetail}
+            />
+          }
+          fileName="Batch_Summary"
+        >
+          {({ loading, error }) =>
+            loading ? (
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
+              >
+                Loading
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                Download As Pdf
+              </Button>
+            )
+          }
+        </PDFDownloadLink>
       </Container>
     </>
   );

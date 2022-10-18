@@ -5,6 +5,7 @@ import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useAddNewMortalityMutation } from "./mortalityApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const CreateMortalityPage = () => {
   const { batchId } = useParams();
@@ -29,14 +30,24 @@ const CreateMortalityPage = () => {
     Boolean
   );
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
   useEffect(() => {
-    if (batch) {
+    if (Object.keys(batch)?.length) {
       setStateBatch(batch);
     }
   }, [batch]);
@@ -82,20 +93,39 @@ const CreateMortalityPage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <CreateMortalityPageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      deathDate={deathDate}
-      setDeathDate={setDeathDate}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can't Create New Details </p>
+  return (
+    <>
+      {isBatchSuccess &&
+      Object.keys(stateBatch)?.length &&
+      stateBatch?.isActive ? (
+        <CreateMortalityPageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          deathDate={deathDate}
+          setDeathDate={setDeathDate}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {!isBatchLoading &&
+      isBatchSuccess &&
+      Object.keys(stateBatch)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can't Create New Details</p>
+      ) : null}
+
+      {isBatchLoading && <PulseLoader color="green" />}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+    </>
   );
 };
 
 export default CreateMortalityPage;
+
+//

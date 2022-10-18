@@ -49,13 +49,15 @@ const HousingsPage = () => {
 
       <Divider sx={{ mb: "15px" }} />
       {stateHousings?.length && !stateError
-        ? stateHousings.map((house) => (
-            <HousingsPageExcerpt
-              key={house.id}
-              house={house}
-              batchId={batchId}
-            />
-          ))
+        ? stateHousings
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((house) => (
+              <HousingsPageExcerpt
+                key={house.id}
+                house={house}
+                batchId={batchId}
+              />
+            ))
         : null}
       {isLoading ? <p>Loading Properties</p> : null}
       {isSuccess && !stateError && !isLoading && !stateHousings?.length ? (

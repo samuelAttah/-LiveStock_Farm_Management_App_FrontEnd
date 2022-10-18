@@ -11,6 +11,7 @@ import blue from "@mui/material/colors/blue";
 import Divider from "@mui/material/Divider";
 import PersonIcon from "@mui/icons-material/Person";
 import { Link } from "react-router-dom";
+import { Button } from "@mui/material";
 
 const UserPageExcerpt = ({
   singleUserDetail,
@@ -25,6 +26,7 @@ const UserPageExcerpt = ({
   open,
   isRemovePictureLoading,
   handleProfilePictureRemoval,
+  handleRedirectToUpdate,
   isLoading,
 }) => {
   return (
@@ -40,7 +42,8 @@ const UserPageExcerpt = ({
                 {singleUserDetail?.profilePicture ? (
                   <CardMedia
                     component="img"
-                    height="140"
+                    height={140}
+                    width={140}
                     image={singleUserDetail?.profilePicture}
                     alt="profile picture"
                   />
@@ -128,11 +131,10 @@ const UserPageExcerpt = ({
               Company/Farm Logo:{" "}
             </Typography>
             {singleUserDetail?.companyLogo ? (
-              <CardMedia
-                component="img"
-                height="140"
-                image={singleUserDetail?.companyLogo}
-                alt="company picture"
+              <img
+                height="100"
+                src={singleUserDetail?.companyLogo}
+                alt="company Logo"
               />
             ) : (
               <Link to="/dashboard/updateuserdetails/#companyLogo">
@@ -162,9 +164,13 @@ const UserPageExcerpt = ({
             ) : null}
           </Box>
           <Box display="flex" mt={1} flexDirection="row">
-            <Typography mr={1}>Home Address: </Typography>
+            <Typography mr={1} textAlign="left">
+              Home Address:{" "}
+            </Typography>
             {singleUserDetail?.homeAddress ? (
-              <Typography>{singleUserDetail?.homeAddress}</Typography>
+              <Typography textAlign={"left"}>
+                {singleUserDetail?.homeAddress}
+              </Typography>
             ) : null}
           </Box>
           <Box display="flex" mt={1} flexDirection="row">
@@ -194,6 +200,15 @@ const UserPageExcerpt = ({
               <Typography>{singleUserDetail?.gender}</Typography>
             ) : null}
           </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Button
+            onClick={handleRedirectToUpdate}
+            size="small"
+            variant="contained"
+          >
+            Update Profile
+          </Button>
         </Grid>
       </Grid>
 

@@ -29,6 +29,7 @@ const farmAnimalsList = [
   { name: "Rabbit" },
   { name: "Sheep" },
   { name: "Silkworm" },
+  { name: "Snail" },
   { name: "Turkey" },
   { name: "Yak" },
   { name: "Yakalo" },

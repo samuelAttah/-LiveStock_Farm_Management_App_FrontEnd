@@ -72,9 +72,13 @@ const EndBatchModal = ({
               display="flex"
               textAlign={"center"}
               fontWeight="bold"
+              paddingX={3}
+              sx={{
+                textAlign: "justify",
+              }}
             >
-              Once A Batch is Ended, it Can't be reversed. You will not be able
-              to create or update Batch details, However you can view Batch
+              Once a Batch is ended, it Can't be reversed.Also, You will not be
+              able to create or update Batch details, However you can view Batch
               anytime you want.
             </Typography>
           </Box>

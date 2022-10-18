@@ -1,11 +1,10 @@
 import * as React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
-import { styled, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import CssBaseline from "@mui/material/CssBaseline";
-import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
@@ -18,67 +17,38 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+import Collapse from "@mui/material/Collapse";
 import Tooltip from "@mui/material/Tooltip";
-import LogoutSharpIcon from "@mui/icons-material/LogoutSharp";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import AccountCircleSharpIcon from "@mui/icons-material/AccountCircleSharp";
+import WorkspacesIcon from "@mui/icons-material/Workspaces";
+import PersonIcon from "@mui/icons-material/Person";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import { toast } from "react-toastify";
-
+import Main from "./Main";
+import AppBar from "./AppBar";
+import DrawerHeader from "./DrawerHeader";
+import ExpandMore from "./ExpandMore";
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
+import { useGetBatchesQuery } from "../../features/batches/batchApiSlice";
+import { useGetUserDetailQuery } from "../../features/user/userApiSlice";
 
 const drawerWidth = 240;
 
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginLeft: `-${drawerWidth}px`,
-    ...(open && {
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    }),
-  })
-);
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  transition: theme.transitions.create(["margin", "width"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-  justifyContent: "flex-end",
-}));
-
-export default function PersistentDrawerLeft() {
+export default function DashBoardLayout() {
   const [logout] = useSendLogoutMutation();
+
+  const [expanded, setExpanded] = React.useState(false);
+  const [settingsExpanded, setSettingsExpanded] = React.useState(false);
 
   const navigate = useNavigate();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -101,6 +71,60 @@ export default function PersistentDrawerLeft() {
       console.log(error);
     }
   };
+
+  const handleExpandClick = () => {
+    setExpanded((prev) => !prev);
+  };
+
+  const handleSettingsExpandClick = () => {
+    setSettingsExpanded((prev) => !prev);
+  };
+
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
+  const handleProfile = () => {
+    navigate("/dashboard/userdetails");
+    setAnchorElUser(null);
+  };
+
+  const handleDashboard = () => {
+    navigate("/dashboard");
+    setAnchorElUser(null);
+  };
+
+  //RTK CUSTOM HOOKS
+  const { data: batches = {}, isSuccess } = useGetBatchesQuery("batchesList", {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const fetchedBatches = Object.keys(batches)?.length
+    ? batches?.ids.map((id) => {
+        return batches?.entities[id];
+      })
+    : [];
+
+  const {
+    data: userDetails = {},
+    // isError,
+    // isLoading,
+    // error,
+  } = useGetUserDetailQuery("userList", {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const arrayOfUserDetails = Object.keys(userDetails)?.length
+    ? userDetails?.ids.map((id) => {
+        return userDetails?.entities[id];
+      })
+    : [];
+
+  const singleUserDetail = arrayOfUserDetails?.[0];
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -134,15 +158,53 @@ export default function PersistentDrawerLeft() {
             Farm Diary
           </Typography>
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Log Out">
-              <IconButton
-                sx={{ p: 0, backgroundColor: "grey" }}
-                color="secondary"
-                onClick={handleLogout}
-              >
-                <LogoutSharpIcon fontSize="medium" />
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                {singleUserDetail?.profilePicture ? (
+                  <Box
+                    borderRadius={100}
+                    sx={{ backgroundColor: "whitesmoke" }}
+                    paddingX={1}
+                    paddingY={0.5}
+                  >
+                    <img
+                      src={singleUserDetail?.profilePicture}
+                      alt="Profile_Picture"
+                      height={25}
+                      width={25}
+                    />
+                  </Box>
+                ) : (
+                  <AccountCircleSharpIcon fontSize="large" color="secondary" />
+                )}
               </IconButton>
             </Tooltip>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              <MenuItem onClick={handleProfile}>
+                <Typography textAlign="center">Profile</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleDashboard}>
+                <Typography textAlign="center"> Dashboard</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>
+                <Typography textAlign="center"> Logout</Typography>
+              </MenuItem>
+            </Menu>
           </Box>
         </Toolbar>
       </AppBar>
@@ -170,29 +232,108 @@ export default function PersistentDrawerLeft() {
         </DrawerHeader>
         <Divider />
         <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleExpandClick}>
+              <ListItemIcon>
+                <WorkspacesIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Batches"} />
+            </ListItemButton>
+            <ExpandMore
+              expand={expanded}
+              onClick={handleExpandClick}
+              aria-expanded={expanded}
+              aria-label="show more"
+            >
+              <ExpandMoreIcon />
+            </ExpandMore>
+          </ListItem>
+          <Collapse in={expanded} timeout="auto" unmountOnExit>
+            {isSuccess && fetchedBatches?.length > 10
+              ? fetchedBatches
+                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                  .slice(0, 10)
+                  .map((batch) => (
+                    <ListItem key={batch.id} disablePadding>
+                      <ListItemButton
+                        onClick={() => navigate(`/batch/${batch.id}`)}
+                      >
+                        <ListItemText primary={batch.batchTitle} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))
+              : isSuccess && fetchedBatches?.length <= 10
+              ? fetchedBatches
+                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                  .map((batch) => (
+                    <ListItem key={batch.id} disablePadding>
+                      <ListItemButton
+                        onClick={() => navigate(`/batch/${batch.id}`)}
+                      >
+                        <ListItemText primary={batch.batchTitle} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))
+              : null}
+          </Collapse>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => navigate("/dashboard/userdetails")}>
+              <ListItemIcon>
+                <PersonIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Profile"} />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleSettingsExpandClick}>
+              <ListItemIcon>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Settings"} />
+            </ListItemButton>
+            <ExpandMore
+              expand={settingsExpanded}
+              onClick={handleSettingsExpandClick}
+              aria-expanded={settingsExpanded}
+              aria-label="show more"
+            >
+              <ExpandMoreIcon />
+            </ExpandMore>
+          </ListItem>
+          <Collapse in={settingsExpanded} timeout="auto" unmountOnExit>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => navigate("/dashboard/verifycurrentpassword")}
+              >
+                <ListItemText primary={"Password Reset"} />
               </ListItemButton>
             </ListItem>
-          ))}
+          </Collapse>
+
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => navigate("/dashboard/documentation")}
+            >
+              <ListItemIcon>
+                <LibraryBooksIcon />
+              </ListItemIcon>
+              <ListItemText primary={"App Manual"} />
+            </ListItemButton>
+          </ListItem>
         </List>
         <Divider />
+
         <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleLogout}>
+              <ListItemIcon>
+                <PowerSettingsNewIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Log Out"} />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
       <Main open={open}>
@@ -204,3 +345,15 @@ export default function PersistentDrawerLeft() {
     </Box>
   );
 }
+
+// <Box sx={{ flexGrow: 0 }}>
+// <Tooltip title="Log Out">
+//   <IconButton
+//     sx={{ p: 0, backgroundColor: "grey" }}
+//     color="secondary"
+//     onClick={handleLogout}
+//   >
+//     <LogoutSharpIcon fontSize="medium" />
+//   </IconButton>
+// </Tooltip>
+// </Box>

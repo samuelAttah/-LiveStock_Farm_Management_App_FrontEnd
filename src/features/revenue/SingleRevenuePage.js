@@ -7,39 +7,55 @@ import {
   useDeleteRevenueMutation,
 } from "./revenueApiSlice";
 import SingleRevenuePageExcerpt from "./SingleRevenuePageExcerpt";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const SingleRevenuePage = () => {
   const { revenueId, batchId } = useParams();
   const navigate = useNavigate();
 
   const [stateRevenue, setStateRevenue] = useState({});
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [createdDate, setCreatedDate] = useState(String);
   const [dateSold, setDateSold] = useState(String);
   const [costPerUnit, setCostPerUnit] = useState(String);
   const [totalCost, setTotalCost] = useState(String);
 
-  const { revenue } = useGetRevenuesQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      revenue: data?.entities[revenueId],
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
-    refetchOnMountOrArgChange: true,
   });
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
-      batch: data?.entities[batchId],
+  const {
+    revenue = {},
+    isLoading: isRevenueLoading,
+    isError: isRevenueError,
+    isSuccess: isRevenueSuccess,
+    error: revenueError,
+  } = useGetRevenuesQuery(batchId, {
+    selectFromResult: ({ data, isLoading, isError, isSuccess, error }) => ({
+      revenue: data?.entities[revenueId],
+      isLoading,
+      isError,
+      isSuccess,
+      error,
     }),
   });
 
   const [deleteRevenue, { isLoading }] = useDeleteRevenueMutation();
 
   useEffect(() => {
-    setLoading(true);
-    if (revenue && batch) {
+    if (Object.keys(revenue)?.length && Object.keys(batch)?.length) {
       setStateRevenue(revenue);
-
       setCreatedDate(revenue?.createdAt);
       setDateSold(revenue?.dateSold);
 
@@ -55,15 +71,7 @@ const SingleRevenuePage = () => {
 
       setCostPerUnit(formattedCostPerUnit);
       setTotalCost(formattedTotalCost);
-
-      setStateError(false);
-
-      setLoading(false);
-    } else {
-      setStateError(true);
-      setLoading(false);
     }
-    return () => setStateError(false);
   }, [revenue, batch]);
 
   const handleClick = () => {
@@ -95,8 +103,11 @@ const SingleRevenuePage = () => {
   };
 
   return (
-    <div>
-      {stateRevenue && !stateError ? (
+    <>
+      {isBatchSuccess &&
+      isRevenueSuccess &&
+      Object.keys(stateRevenue)?.length &&
+      Object.keys(batch)?.length ? (
         <SingleRevenuePageExcerpt
           stateRevenue={stateRevenue}
           costPerUnit={costPerUnit}
@@ -109,8 +120,28 @@ const SingleRevenuePage = () => {
           isLoading={isLoading}
         />
       ) : null}
-      {!loading && stateError ? <p>Revenue Does not exist</p> : null}
-    </div>
+
+      {!isBatchLoading &&
+      !isRevenueLoading &&
+      isBatchSuccess &&
+      isRevenueSuccess &&
+      Object.keys(batch)?.length &&
+      !Object.keys(revenue)?.length ? (
+        <p>Revenue Does not exist</p>
+      ) : null}
+
+      {isBatchLoading || isRevenueLoading ? (
+        <PulseLoader color="green" />
+      ) : null}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isRevenueLoading && isRevenueError ? (
+        <p>{revenueError?.data?.message ?? "Failed to Load Revenue Details"}</p>
+      ) : null}
+    </>
   );
 };
 

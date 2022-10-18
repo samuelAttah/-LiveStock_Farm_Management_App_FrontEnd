@@ -54,6 +54,9 @@ import UserPage from "../features/user/UserPage";
 import UpdateUserPage from "../features/user/UpdateUserPage";
 import PasswordVerifyPage from "../features/user/PasswordVerifyPage";
 import PasswordResetPage from "../features/user/PasswordResetPage";
+import AboutPage from "../common/components/AboutPage";
+import ContactPage from "../common/components/ContactPage";
+import DocumentationPage from "../features/user/DocumentationPage";
 
 const App = () => {
   return (
@@ -65,6 +68,8 @@ const App = () => {
               <Route index element={<HomePage />} />
               <Route path="register" element={<RegisterPage />} />
               <Route path="login" element={<LoginPage />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="contact" element={<ContactPage />} />
             </Route>
 
             {/* ProtectedRoutes */}
@@ -82,6 +87,7 @@ const App = () => {
                     element={<PasswordVerifyPage />}
                   />
                   <Route path="resetpassword" element={<PasswordResetPage />} />
+                  <Route path="documentation" element={<DocumentationPage />} />
                   <Route path="batches/create" element={<CreateBatchPage />} />
                 </Route>
                 <Route path="batch/:batchId" element={<BatchDashBoardLayout />}>

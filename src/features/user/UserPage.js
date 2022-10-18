@@ -7,8 +7,11 @@ import {
 } from "./userApiSlice";
 import { storage } from "../../firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { useNavigate } from "react-router-dom";
 
 const UserPage = () => {
+  const navigate = useNavigate();
+
   const [errors, setErrors] = useState("");
   const [localFile, setLocalFile] = useState(null);
 
@@ -68,7 +71,7 @@ const UserPage = () => {
     setLocalFile(e.target.files[0]);
   };
 
-  //FUNCTION TO UPLOAD PROFILE PICTURE TO DATABASE AND RETURN URL
+  //FUNCTION TO UPLOAD PROFILE PICTURE TO FIREBASE AND RETURN URL
   const uploadImage = (username, file) => (onSuccess) => (onError) => {
     const fileName =
       file?.name.substring(file?.name.lastIndexOf("/") + 1) ||
@@ -154,6 +157,10 @@ const UserPage = () => {
     setOpen(false);
   };
 
+  const handleRedirectToUpdate = () => {
+    navigate("/dashboard/updateuserdetails");
+  };
+
   return (
     <UserPageExcerpt
       singleUserDetail={singleUserDetail}
@@ -169,6 +176,7 @@ const UserPage = () => {
       isRemovePictureLoading={isRemovePictureLoading}
       handleProfilePictureRemoval={handleProfilePictureRemoval}
       isLoading={isLoading}
+      handleRedirectToUpdate={handleRedirectToUpdate}
     />
   );
 };

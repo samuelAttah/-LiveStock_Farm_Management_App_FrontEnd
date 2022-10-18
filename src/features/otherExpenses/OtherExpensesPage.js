@@ -47,13 +47,15 @@ const OtherExpensesPage = () => {
 
       <Divider sx={{ mb: "15px" }} />
       {stateExpenses?.length && !stateError
-        ? stateExpenses.map((expense) => (
-            <OtherExpensesPageExcerpt
-              key={expense.id}
-              expense={expense}
-              batchId={batchId}
-            />
-          ))
+        ? stateExpenses
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((expense) => (
+              <OtherExpensesPageExcerpt
+                key={expense.id}
+                expense={expense}
+                batchId={batchId}
+              />
+            ))
         : null}
       {isLoading ? <p>Loading Other Expenses</p> : null}
       {isSuccess && !stateError && !isLoading && !stateExpenses?.length ? (

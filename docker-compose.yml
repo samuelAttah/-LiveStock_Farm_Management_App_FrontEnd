@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: livestock_farm-c
+    image: livestock_farm-i
+    build: 
+      context: .
+    ports:
+      - 8080:80

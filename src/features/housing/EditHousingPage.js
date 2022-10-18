@@ -8,20 +8,43 @@ import {
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const EditHousingPage = () => {
   const { batchId, housingId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  //USING RTK CUSTOM HOOKS
+
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
-  const { house } = useGetHousingsQuery(batchId, {
-    selectFromResult: ({ data }) => ({
+  const {
+    house = {},
+    isError: isHouseError,
+    isLoading: isHouseLoading,
+    isSuccess: isHouseSuccess,
+    error: houseError,
+  } = useGetHousingsQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
       house: data?.entities[housingId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
@@ -48,7 +71,7 @@ const EditHousingPage = () => {
   ].every(Boolean);
 
   useEffect(() => {
-    if (batch && house) {
+    if (Object.keys(batch)?.length && Object.keys(house)?.length) {
       setStateBatch(batch);
       setFormData({
         housingType: house?.housingType,
@@ -102,20 +125,44 @@ const EditHousingPage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <EditHousingPageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      datePurchased={datePurchased}
-      setDatePurchased={setDatePurchased}
-      stateBatch={stateBatch}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can not be Updated</p>
+  return (
+    <>
+      {isBatchSuccess &&
+      isHouseSuccess &&
+      Object.keys(stateBatch)?.length &&
+      Object.keys(house)?.length &&
+      stateBatch?.isActive ? (
+        <EditHousingPageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          datePurchased={datePurchased}
+          setDatePurchased={setDatePurchased}
+          stateBatch={stateBatch}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {isBatchSuccess &&
+      isHouseSuccess &&
+      Object.keys(stateBatch)?.length &&
+      Object.keys(house)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can't Update Details</p>
+      ) : null}
+
+      {isBatchLoading || isHouseLoading ? <PulseLoader color="green" /> : null}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isHouseLoading && isHouseError ? (
+        <p>{houseError?.data?.message ?? "Failed to Load House Details"}</p>
+      ) : null}
+    </>
   );
 };
 

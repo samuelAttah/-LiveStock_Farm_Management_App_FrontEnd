@@ -7,39 +7,55 @@ import {
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import SingleOtherExpensePageExcerpt from "./SingleOtherExpensePageExcerpt";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const SingleOtherExpensePage = () => {
   const { expenseId, batchId } = useParams();
   const navigate = useNavigate();
 
   const [stateExpense, setStateExpense] = useState({});
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [createdDate, setCreatedDate] = useState(String);
   const [purchasedDate, setPurchasedDate] = useState(String);
   const [cost, setCost] = useState(String);
 
-  const { expense } = useGetOtherExpensesQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      expense: data?.entities[expenseId],
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
-    refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
 
-  console.log("expenseOject", expense);
-
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
-      batch: data?.entities[batchId],
+  const {
+    expense = {},
+    isLoading: isExpenseLoading,
+    isError: isExpenseError,
+    isSuccess: isExpenseSuccess,
+    error: expenseError,
+  } = useGetOtherExpensesQuery(batchId, {
+    selectFromResult: ({ data, isLoading, isError, isSuccess, error }) => ({
+      expense: data?.entities[expenseId],
+      isLoading,
+      isError,
+      isSuccess,
+      error,
     }),
+    refetchOnMountOrArgChange: true,
   });
 
   const [deleteExpense, { isLoading }] = useDeleteOtherExpenseMutation();
 
   useEffect(() => {
-    setLoading(true);
-    if (expense && batch) {
+    if (Object.keys(expense)?.length && Object.keys(batch)?.length) {
       setStateExpense(expense);
 
       setCreatedDate(expense?.createdAt);
@@ -51,15 +67,7 @@ const SingleOtherExpensePage = () => {
       }).format(Object.values(expense?.amountPurchased)[0]);
 
       setCost(formattedCost);
-
-      setStateError(false);
-
-      setLoading(false);
-    } else {
-      setStateError(true);
-      setLoading(false);
     }
-    return () => setStateError(false);
   }, [expense, batch]);
 
   const handleClick = () => {
@@ -91,8 +99,11 @@ const SingleOtherExpensePage = () => {
   };
 
   return (
-    <div>
-      {stateExpense && !stateError ? (
+    <>
+      {isBatchSuccess &&
+      isExpenseSuccess &&
+      Object.keys(batch)?.length &&
+      Object.keys(stateExpense)?.length ? (
         <SingleOtherExpensePageExcerpt
           stateExpense={stateExpense}
           cost={cost}
@@ -104,8 +115,28 @@ const SingleOtherExpensePage = () => {
           isLoading={isLoading}
         />
       ) : null}
-      {!loading && stateError ? <p>Expense Does not exist</p> : null}
-    </div>
+
+      {!Object.keys(stateExpense)?.length &&
+      isBatchSuccess &&
+      isExpenseSuccess &&
+      Object.keys(batch)?.length ? (
+        <p>Expense Does not exist</p>
+      ) : null}
+
+      {isBatchLoading || isExpenseLoading ? (
+        <PulseLoader color="green" />
+      ) : null}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isExpenseLoading && isExpenseError ? (
+        <p>
+          {expenseError?.data?.message ?? "Failed to Load Mortality Details"}
+        </p>
+      ) : null}
+    </>
   );
 };
 

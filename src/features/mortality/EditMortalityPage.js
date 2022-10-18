@@ -8,20 +8,41 @@ import {
 } from "./mortalityApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const EditMortalityPage = () => {
   const { batchId, mortalityId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
-  const { mortality } = useGetMortalitysQuery(batchId, {
-    selectFromResult: ({ data }) => ({
+  const {
+    mortality = {},
+    isError: isMortalityError,
+    isLoading: isMortalityLoading,
+    isSuccess: isMortalitySuccess,
+    error: mortalityError,
+  } = useGetMortalitysQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
       mortality: data?.entities[mortalityId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
@@ -44,13 +65,13 @@ const EditMortalityPage = () => {
   );
 
   useEffect(() => {
-    if (batch) {
+    if (Object.keys(batch)?.length) {
       setStateBatch(batch);
     }
   }, [batch]);
 
   useEffect(() => {
-    if (mortality) {
+    if (Object.keys(mortality)?.length) {
       setFormData({
         numberDead: Number(mortality?.numberDead),
         deathReason: mortality?.deathReason,
@@ -103,19 +124,47 @@ const EditMortalityPage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <EditMortalityPageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      deathDate={deathDate}
-      setDeathDate={setDeathDate}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can't Update Details</p>
+  return (
+    <>
+      {isBatchSuccess &&
+      isMortalitySuccess &&
+      Object.keys(stateBatch)?.length &&
+      Object.keys(mortality)?.length &&
+      stateBatch?.isActive ? (
+        <EditMortalityPageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          deathDate={deathDate}
+          setDeathDate={setDeathDate}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {isBatchSuccess &&
+      isMortalitySuccess &&
+      Object.keys(stateBatch)?.length &&
+      Object.keys(mortality)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can't Update Details</p>
+      ) : null}
+
+      {isBatchLoading || isMortalityLoading ? (
+        <PulseLoader color="green" />
+      ) : null}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isMortalityLoading && isMortalityError ? (
+        <p>
+          {mortalityError?.data?.message ?? "Failed to Load Mortality Details"}
+        </p>
+      ) : null}
+    </>
   );
 };
 

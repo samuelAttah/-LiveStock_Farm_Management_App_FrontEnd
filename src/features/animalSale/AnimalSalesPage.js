@@ -44,18 +44,20 @@ const AnimalSalesPage = () => {
         <Typography fontWeight="bold">
           List of All Revenues Generated from Animal Sales in this Batch
         </Typography>
-        <Link to={`/batch/${batchId}/animalsales/create`}>NEW SALES</Link>
+        <Link to={`/batch/${batchId}/animalsales/create`}>NEW SALE</Link>
       </Box>
 
       <Divider sx={{ mb: "15px" }} />
       {stateAnimalSales?.length && !stateError
-        ? stateAnimalSales.map((animalSale) => (
-            <AnimalSalesPageExcerpt
-              key={animalSale.id}
-              animalSale={animalSale}
-              batchId={batchId}
-            />
-          ))
+        ? stateAnimalSales
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((animalSale) => (
+              <AnimalSalesPageExcerpt
+                key={animalSale.id}
+                animalSale={animalSale}
+                batchId={batchId}
+              />
+            ))
         : null}
       {isLoading ? <p>Loading Animal Sales</p> : null}
       {isSuccess && !stateError && !isLoading && !stateAnimalSales?.length ? (

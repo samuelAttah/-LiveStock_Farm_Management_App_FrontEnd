@@ -1,4 +1,3 @@
-import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import { NavLink } from "react-router-dom";
 import orange from "@mui/material/colors/orange";
@@ -10,18 +9,17 @@ const BatchNavComponent = ({ batch }) => {
   const activeStyle = { color: orange[700] };
   const expensesActiveStyle = { color: "black" };
   return (
-    <Box>
-      <Divider />
+    <Box paddingBottom={15}>
       <Grid
         container
         flexDirection="row"
-        padding="10px"
         position="absolute"
-        display="flex"
+        bottom={130}
+        // columnSpacing={1}
       >
         <Grid
           item
-          xs={1.5}
+          xs={2.2}
           md={1.5}
           sx={{
             backgroundColor: red[300],
@@ -38,7 +36,7 @@ const BatchNavComponent = ({ batch }) => {
 
         <Grid
           item
-          xs={1.5}
+          xs={2.2}
           md={1.5}
           sx={{ backgroundColor: red[300], borderRadius: "100px" }}
         >
@@ -51,7 +49,7 @@ const BatchNavComponent = ({ batch }) => {
         </Grid>
         <Grid
           item
-          xs={1.5}
+          xs={2.2}
           md={1.5}
           sx={{ backgroundColor: red[300], borderRadius: "100px" }}
         >
@@ -64,7 +62,7 @@ const BatchNavComponent = ({ batch }) => {
         </Grid>
         <Grid
           item
-          xs={1.5}
+          xs={2.2}
           md={1.5}
           sx={{ backgroundColor: red[300], borderRadius: "100px" }}
         >
@@ -77,7 +75,7 @@ const BatchNavComponent = ({ batch }) => {
         </Grid>
         <Grid
           item
-          xs={1.5}
+          xs={2.2}
           md={1.5}
           sx={{ backgroundColor: red[300], borderRadius: "100px" }}
         >
@@ -90,7 +88,7 @@ const BatchNavComponent = ({ batch }) => {
         </Grid>
         <Grid
           item
-          xs={1.5}
+          xs={2.2}
           md={1.5}
           sx={{ backgroundColor: green[200], borderRadius: "100px" }}
         >
@@ -103,7 +101,7 @@ const BatchNavComponent = ({ batch }) => {
         </Grid>
         <Grid
           item
-          xs={1.5}
+          xs={2.2}
           md={1.5}
           sx={{ backgroundColor: green[200], borderRadius: "100px" }}
         >
@@ -115,7 +113,6 @@ const BatchNavComponent = ({ batch }) => {
           </NavLink>
         </Grid>
       </Grid>
-      <Divider />
     </Box>
   );
 };

@@ -6,18 +6,27 @@ import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import countryCurrencyList from "../../common/utils/countryCurrencyList";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { PulseLoader } from "react-spinners";
 
 const CreateDrugPage = () => {
   const { batchId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
-
-  console.log("batch", batch);
 
   const [formData, setFormData] = useState({
     drugName: "",
@@ -29,7 +38,7 @@ const CreateDrugPage = () => {
 
   const [fetchError, setFetchError] = useState("");
 
-  const [stateBatch, setStateBatch] = useState();
+  const [stateBatch, setStateBatch] = useState({});
 
   //   console.log("currency", currency);
   const [datePurchased, setDatePurchased] = useState(dayjs());
@@ -46,7 +55,7 @@ const CreateDrugPage = () => {
   ].every(Boolean);
 
   useEffect(() => {
-    if (batch) {
+    if (Object.keys(batch)?.length) {
       setStateBatch(batch);
     }
   }, [batch]);
@@ -85,7 +94,7 @@ const CreateDrugPage = () => {
       datePurchased: datePurchased.format("YYYY-MM-DD"),
       batchId: batchId,
     };
-    console.log("payLoad", payLoad);
+
     try {
       await createDrug(payLoad);
     } catch (error) {
@@ -93,22 +102,37 @@ const CreateDrugPage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <CreateDrugPageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      currency={currency}
-      setCurrency={setCurrency}
-      canSave={canSave}
-      datePurchased={datePurchased}
-      setDatePurchased={setDatePurchased}
-      stateBatch={stateBatch}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can't Create New Details</p>
+  return (
+    <>
+      {!isBatchLoading &&
+      isBatchSuccess &&
+      Object.keys?.(stateBatch)?.length &&
+      stateBatch?.isActive ? (
+        <CreateDrugPageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          currency={currency}
+          setCurrency={setCurrency}
+          canSave={canSave}
+          datePurchased={datePurchased}
+          setDatePurchased={setDatePurchased}
+          stateBatch={stateBatch}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+      {!isBatchLoading &&
+      isBatchSuccess &&
+      Object.keys?.(stateBatch)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can't Create New Details</p>
+      ) : null}
+      {isBatchLoading && <PulseLoader color="green" />}
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message}</p>
+      ) : null}
+    </>
   );
 };
 

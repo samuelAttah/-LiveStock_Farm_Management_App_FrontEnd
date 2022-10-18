@@ -5,20 +5,41 @@ import { useUpdateFeedMutation, useGetFeedsQuery } from "./feedsApiSlice";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const EditFeedPage = () => {
   const { batchId, feedId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
-  const { feed } = useGetFeedsQuery(batchId, {
-    selectFromResult: ({ data }) => ({
+  const {
+    feed = {},
+    isLoading: isFeedLoading,
+    isError: isFeedError,
+    isSuccess: isFeedSuccess,
+    error: feedError,
+  } = useGetFeedsQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
       feed: data?.entities[feedId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
@@ -41,7 +62,7 @@ const EditFeedPage = () => {
   );
 
   useEffect(() => {
-    if (batch && feed) {
+    if (Object.keys(batch)?.length && Object.keys(feed)?.length) {
       setStateBatch(batch);
       setFormData({
         feedName: feed?.feedName,
@@ -93,20 +114,51 @@ const EditFeedPage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <EditFeedPageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      datePurchased={datePurchased}
-      setDatePurchased={setDatePurchased}
-      stateBatch={stateBatch}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can not be Updated</p>
+  return (
+    <>
+      {isBatchSuccess &&
+      isFeedSuccess &&
+      Object.keys(feed)?.length &&
+      Object.keys(stateBatch)?.length &&
+      stateBatch?.isActive ? (
+        <EditFeedPageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          datePurchased={datePurchased}
+          setDatePurchased={setDatePurchased}
+          stateBatch={stateBatch}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {isBatchSuccess &&
+      isFeedSuccess &&
+      Object.keys(feed)?.length &&
+      Object.keys(stateBatch)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can't Update Details </p>
+      ) : null}
+
+      {isBatchSuccess &&
+      isFeedSuccess &&
+      !Object.keys(stateBatch)?.length &&
+      !Object.keys(feed)?.length ? (
+        <p>Feed Does not Exist </p>
+      ) : null}
+
+      {isBatchLoading || isFeedLoading ? <PulseLoader color="green" /> : null}
+
+      {isBatchError && !isBatchLoading ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch"}</p>
+      ) : null}
+
+      {isFeedError && !isFeedLoading ? (
+        <p>{feedError?.data?.message ?? "Failed to Load Feed"}</p>
+      ) : null}
+    </>
   );
 };
 

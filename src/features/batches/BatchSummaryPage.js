@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGetBatchesQuery } from "./batchApiSlice";
+import { useGetUserDetailQuery } from "../user/userApiSlice";
 import BatchSummaryPageExcerpt from "./BatchSummaryPageExcerpt";
 
 const BatchSummaryPage = () => {
   const { batchId } = useParams();
+
+  //USING RTK CUSTOM HOOKS
 
   const { batch, isError, isLoading, isSuccess, error } = useGetBatchesQuery(
     "batchesList",
@@ -20,7 +23,18 @@ const BatchSummaryPage = () => {
     }
   );
 
+  const {
+    data: userDetails = {},
+    // isError,
+    // isLoading,
+    // error,
+  } = useGetUserDetailQuery("userList", {
+    refetchOnMountOrArgChange: true,
+  });
+
   const [stateBatch, setStateBatch] = useState({});
+
+  const [initialPurchased, setInitialPurchased] = useState(0);
 
   const [createdDate, setCreatedDate] = useState(String);
   const [costPerUnit, setCostPerUnit] = useState(String);
@@ -37,6 +51,8 @@ const BatchSummaryPage = () => {
         currency: batch.currency ?? "USD",
       }).format(Object.values(batch.totalPurchaseCost)[0]);
 
+      setInitialPurchased(Object.values(batch.totalPurchaseCost)[0]);
+
       const formattedCostPerUnit = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: batch.currency ?? "USD",
@@ -47,6 +63,14 @@ const BatchSummaryPage = () => {
       setCostPerUnit(formattedCostPerUnit);
     }
   }, [batch, isSuccess]);
+
+  const arrayOfUserDetails = Object.keys(userDetails)?.length
+    ? userDetails?.ids.map((id) => {
+        return userDetails?.entities[id];
+      })
+    : [];
+
+  const singleUserDetail = arrayOfUserDetails?.[0];
 
   const feeds = stateBatch?.feed;
   const housings = stateBatch?.housing;
@@ -59,7 +83,7 @@ const BatchSummaryPage = () => {
   //DEAD ANIMALS CALCULATION
   const totalDeadAnimals = mortalities?.length
     ? batch?.mortality.reduce((acc, mortality) => {
-        return acc + mortality.numberDead;
+        return acc + Number(mortality.numberDead);
       }, 0)
     : 0;
 
@@ -67,7 +91,7 @@ const BatchSummaryPage = () => {
   const numberOfTimesFeedExpense = feeds?.length;
   const totalAmountSpentOnFeeds = feeds?.length
     ? feeds.reduce((acc, feed) => {
-        return acc + Object.values(feed.amountPurchased)[0];
+        return acc + Number(Object.values(feed.amountPurchased)[0]);
       }, 0)
     : 0;
 
@@ -81,7 +105,7 @@ const BatchSummaryPage = () => {
 
   const totalAmountSpentOnDrugs = drugs?.length
     ? drugs.reduce((acc, drug) => {
-        return acc + Object.values(drug.cost)[0];
+        return acc + Number(Object.values(drug.cost)[0]);
       }, 0)
     : 0;
 
@@ -91,11 +115,11 @@ const BatchSummaryPage = () => {
   }).format(totalAmountSpentOnDrugs);
 
   //HOUSINGS EXPENSES CALCULATION
-  const numberOfTimesHousingExpense = drugs?.length;
+  const numberOfTimesHousingExpense = housings?.length;
 
   const totalAmountSpentOnHousing = housings?.length
     ? housings.reduce((acc, house) => {
-        return acc + Object.values(house.cost)[0];
+        return acc + Number(Object.values(house.cost)[0]);
       }, 0)
     : 0;
 
@@ -109,7 +133,7 @@ const BatchSummaryPage = () => {
 
   const totalAmountSpentOnOtherExpenses = otherExpenses?.length
     ? otherExpenses.reduce((acc, expense) => {
-        return acc + Object.values(expense.amountPurchased)[0];
+        return acc + Number(Object.values(expense.amountPurchased)[0]);
       }, 0)
     : 0;
 
@@ -126,13 +150,13 @@ const BatchSummaryPage = () => {
 
   const totalNumberOfAnimalsSold = animalSales?.length
     ? animalSales.reduce((acc, sale) => {
-        return acc + Object.values(sale.numberSold)[0];
+        return acc + Number(sale.numberSold);
       }, 0)
     : 0;
 
   const totalIncomeGeneratedFromAnimalSales = animalSales?.length
     ? animalSales.reduce((acc, sale) => {
-        return acc + Object.values(sale.totalCost)[0];
+        return acc + Number(Object.values(sale.totalCost)[0]);
       }, 0)
     : 0;
 
@@ -149,7 +173,7 @@ const BatchSummaryPage = () => {
 
   const totalIncomeGeneratedFromOtherSales = revenues?.length
     ? revenues.reduce((acc, revenue) => {
-        return acc + Object.values(revenue.totalCost)[0];
+        return acc + Number(Object.values(revenue.totalCost)[0]);
       }, 0)
     : 0;
 
@@ -163,10 +187,11 @@ const BatchSummaryPage = () => {
 
   //TOTAL EXPENSES
   const totalBatchExpenses =
-    totalAmountSpentOnFeeds +
-    totalAmountSpentOnDrugs +
-    totalAmountSpentOnHousing +
-    totalAmountSpentOnOtherExpenses;
+    Number(initialPurchased) +
+    Number(totalAmountSpentOnFeeds) +
+    Number(totalAmountSpentOnDrugs) +
+    Number(totalAmountSpentOnHousing) +
+    Number(totalAmountSpentOnOtherExpenses);
 
   const formattedTotalBatchExpenses = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -175,48 +200,60 @@ const BatchSummaryPage = () => {
 
   //TOTAL REVENUE GENERATED
   const totalBatchRevenues =
-    totalIncomeGeneratedFromAnimalSales + totalIncomeGeneratedFromOtherSales;
+    Number(totalIncomeGeneratedFromAnimalSales) +
+    Number(totalIncomeGeneratedFromOtherSales);
 
   const formattedTotalBatchRevenues = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: stateBatch?.currency ?? "USD",
   }).format(totalBatchRevenues);
 
+  //PROFIT OR LOSS EVALUATION
+  const profitOrLoss = totalBatchRevenues - totalBatchExpenses;
+
+  const formattedProfitOrLoss = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: stateBatch?.currency ?? "USD",
+  }).format(profitOrLoss);
+
   return (
     <>
       {isSuccess && Object.keys(stateBatch)?.length ? (
-        <BatchSummaryPageExcerpt
-          batch={stateBatch}
-          totalDeadAnimals={totalDeadAnimals}
-          costPerUnit={costPerUnit}
-          totalPurchaseCost={totalPurchaseCost}
-          createdDate={createdDate}
-          numberOfTimesFeedExpense={numberOfTimesFeedExpense}
-          formattedTotalAmountSpentOnFeeds={formattedTotalAmountSpentOnFeeds}
-          numberOfTimesDrugExpense={numberOfTimesDrugExpense}
-          formattedTotalAmountSpentOnDrugs={formattedTotalAmountSpentOnDrugs}
-          numberOfTimesHousingExpense={numberOfTimesHousingExpense}
-          formattedTotalAmountSpentOnHousings={
-            formattedTotalAmountSpentOnHousings
-          }
-          numberOfTimesOtherExpense={numberOfTimesOtherExpense}
-          formattedTotalAmountSpentOnOtherExpenses={
-            formattedTotalAmountSpentOnOtherExpenses
-          }
-          numberOfTimesAnimalsWereSold={numberOfTimesAnimalsWereSold}
-          totalNumberOfAnimalsSold={totalNumberOfAnimalsSold}
-          formattedTotalIncomeGeneratedFromAnimalSales={
-            formattedTotalIncomeGeneratedFromAnimalSales
-          }
-          numberOfTimesOtherItemsWereSold={numberOfTimesOtherItemsWereSold}
-          formattedTotalIncomeGeneratedFromOtherSales={
-            formattedTotalIncomeGeneratedFromOtherSales
-          }
-          formattedTotalBatchExpenses={formattedTotalBatchExpenses}
-          formattedTotalBatchRevenues={formattedTotalBatchRevenues}
-          totalBatchExpenses={totalBatchExpenses}
-          totalBatchRevenues={totalBatchRevenues}
-        />
+        <>
+          <BatchSummaryPageExcerpt
+            batch={stateBatch}
+            totalDeadAnimals={totalDeadAnimals}
+            costPerUnit={costPerUnit}
+            totalPurchaseCost={totalPurchaseCost}
+            createdDate={createdDate}
+            numberOfTimesFeedExpense={numberOfTimesFeedExpense}
+            formattedTotalAmountSpentOnFeeds={formattedTotalAmountSpentOnFeeds}
+            numberOfTimesDrugExpense={numberOfTimesDrugExpense}
+            formattedTotalAmountSpentOnDrugs={formattedTotalAmountSpentOnDrugs}
+            numberOfTimesHousingExpense={numberOfTimesHousingExpense}
+            formattedTotalAmountSpentOnHousings={
+              formattedTotalAmountSpentOnHousings
+            }
+            numberOfTimesOtherExpense={numberOfTimesOtherExpense}
+            formattedTotalAmountSpentOnOtherExpenses={
+              formattedTotalAmountSpentOnOtherExpenses
+            }
+            numberOfTimesAnimalsWereSold={numberOfTimesAnimalsWereSold}
+            totalNumberOfAnimalsSold={totalNumberOfAnimalsSold}
+            formattedTotalIncomeGeneratedFromAnimalSales={
+              formattedTotalIncomeGeneratedFromAnimalSales
+            }
+            numberOfTimesOtherItemsWereSold={numberOfTimesOtherItemsWereSold}
+            formattedTotalIncomeGeneratedFromOtherSales={
+              formattedTotalIncomeGeneratedFromOtherSales
+            }
+            formattedTotalBatchExpenses={formattedTotalBatchExpenses}
+            formattedTotalBatchRevenues={formattedTotalBatchRevenues}
+            profitOrLoss={profitOrLoss}
+            formattedProfitOrLoss={formattedProfitOrLoss}
+            singleUserDetail={singleUserDetail}
+          />
+        </>
       ) : null}
       {isLoading && !isError ? <p>Loading...</p> : null}
       {isError && !isLoading && error ? error?.data.message : null}

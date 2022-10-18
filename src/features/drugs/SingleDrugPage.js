@@ -11,32 +11,48 @@ const SingleDrugPage = () => {
   const navigate = useNavigate();
 
   const [stateDrug, setStateDrug] = useState({});
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
+
   const [createdDate, setCreatedDate] = useState(String);
   const [datePurchased, setDatePurchased] = useState(String);
   const [cost, setCost] = useState(String);
 
-  const { drug } = useGetDrugsQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      drug: data?.entities[drugId],
+  const {
+    drug = {},
+    isError: isDrugError,
+    isLoading: isDrugLoading,
+    isSuccess: isDrugSuccess,
+    error: drugError,
+  } = useGetDrugsQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      drug: data?.entities[drugId] ?? {},
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
-    refetchOnMountOrArgChange: true,
   });
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
   const [deleteDrug, { isLoading }] = useDeleteDrugMutation();
 
   useEffect(() => {
-    setLoading(true);
-    if (drug && batch) {
+    if (Object.keys(drug)?.length && Object.keys(batch)?.length) {
       setStateDrug(drug);
-      console.log("indrug", drug);
 
       setCreatedDate(drug.createdAt);
       setDatePurchased(drug.datePurchased);
@@ -47,15 +63,7 @@ const SingleDrugPage = () => {
       }).format(Object.values(drug.cost)[0]);
 
       setCost(formattedCost);
-
-      setStateError(false);
-
-      setLoading(false);
-    } else {
-      setStateError(true);
-      setLoading(false);
     }
-    return () => setStateError(false);
   }, [drug, batch]);
 
   const handleClick = () => {
@@ -88,7 +96,10 @@ const SingleDrugPage = () => {
 
   return (
     <div>
-      {stateDrug && !stateError ? (
+      {isBatchSuccess &&
+      isDrugSuccess &&
+      Object.keys(stateDrug)?.length &&
+      Object.keys(batch)?.length ? (
         <SingleDrugPageExcerpt
           stateDrug={stateDrug}
           cost={cost}
@@ -100,7 +111,22 @@ const SingleDrugPage = () => {
           isLoading={isLoading}
         />
       ) : null}
-      {!loading && stateError ? <p>Drug Does not exist</p> : null}
+
+      {!isBatchLoading &&
+      !isDrugLoading &&
+      !isBatchError &&
+      !isDrugError &&
+      !Object.keys(stateDrug)?.length ? (
+        <p>Drug Does not exist</p>
+      ) : null}
+
+      {!isBatchLoading && !isDrugLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isBatchLoading && !isDrugLoading && isDrugError ? (
+        <p>{drugError?.data?.message ?? "Failed to Load Drug Details"}</p>
+      ) : null}
     </div>
   );
 };

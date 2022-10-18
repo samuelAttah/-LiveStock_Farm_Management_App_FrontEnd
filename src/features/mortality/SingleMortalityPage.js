@@ -7,46 +7,54 @@ import {
 } from "./mortalityApiSlice";
 import SingleMortalityPageExcerpt from "./SingleMortalityPageExcerpt";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const SingleMortalityPage = () => {
   const { mortalityId, batchId } = useParams();
   const navigate = useNavigate();
 
   const [stateMortality, setStateMortality] = useState({});
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [createdDate, setCreatedDate] = useState(String);
 
-  const { mortality } = useGetMortalitysQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      mortality: data?.entities[mortalityId],
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
-    refetchOnMountOrArgChange: true,
   });
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
-      batch: data?.entities[batchId],
+  const {
+    mortality = {},
+    isError: isMortalityError,
+    isLoading: isMortalityLoading,
+    isSuccess: isMortalitySuccess,
+    error: mortalityError,
+  } = useGetMortalitysQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      mortality: data?.entities[mortalityId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
   const [deleteMortality, { isLoading }] = useDeleteMortalityMutation();
 
   useEffect(() => {
-    setLoading(true);
-    if (mortality) {
+    if (Object.keys(mortality)?.length) {
       setStateMortality(mortality);
-      console.log("inmortality", mortality);
-
       setCreatedDate(mortality.createdAt);
-
-      setStateError(false);
-      setLoading(false);
-    } else {
-      setStateError(true);
-      setLoading(false);
     }
-    return () => setStateError(false);
   }, [mortality]);
 
   const handleClick = () => {
@@ -79,7 +87,10 @@ const SingleMortalityPage = () => {
 
   return (
     <div>
-      {stateMortality && !stateError ? (
+      {isBatchSuccess &&
+      isMortalitySuccess &&
+      Object.keys(batch)?.length &&
+      Object.keys(stateMortality)?.length ? (
         <SingleMortalityPageExcerpt
           stateMortality={stateMortality}
           createdDate={createdDate}
@@ -89,7 +100,27 @@ const SingleMortalityPage = () => {
           isLoading={isLoading}
         />
       ) : null}
-      {!loading && stateError ? <p>Livestock Death Does not exist</p> : null}
+
+      {!Object.keys(stateMortality)?.length &&
+      isBatchSuccess &&
+      isMortalitySuccess &&
+      Object.keys(batch)?.length ? (
+        <p>Mortality Does not Exist</p>
+      ) : null}
+
+      {isBatchLoading || isMortalityLoading ? (
+        <PulseLoader color="green" />
+      ) : null}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isMortalityLoading && isMortalityError ? (
+        <p>
+          {mortalityError?.data?.message ?? "Failed to Load Mortality Details"}
+        </p>
+      ) : null}
     </div>
   );
 };

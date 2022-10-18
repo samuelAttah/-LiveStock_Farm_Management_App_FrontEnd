@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import CreateAnimalSalePageExcerpt from "./CreateAnimalSalePageExcerpt";
 import { useAddNewAnimalSaleMutation } from "./animalSaleApiSlice";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
+import PulseLoader from "react-spinners/PulseLoader";
 
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -11,9 +12,19 @@ const CreateAnimalSalePage = () => {
   const { batchId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch,
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
@@ -82,20 +93,35 @@ const CreateAnimalSalePage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <CreateAnimalSalePageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      dateSold={dateSold}
-      setDateSold={setDateSold}
-      stateBatch={stateBatch}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can't Create New Details</p>
+  return (
+    <>
+      {isBatchSuccess &&
+      !isBatchLoading &&
+      Object.keys(stateBatch)?.length &&
+      stateBatch?.isActive ? (
+        <CreateAnimalSalePageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          dateSold={dateSold}
+          setDateSold={setDateSold}
+          stateBatch={stateBatch}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {isBatchSuccess &&
+      !isBatchLoading &&
+      Object.keys(stateBatch)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches can't create New Details</p>
+      ) : null}
+
+      {isBatchLoading ? <PulseLoader color="green" /> : null}
+      {isBatchError ? <p>{batchError?.data?.message}</p> : null}
+    </>
   );
 };
 

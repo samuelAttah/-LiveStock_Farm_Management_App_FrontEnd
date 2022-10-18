@@ -4,41 +4,54 @@ import { useGetFeedsQuery, useDeleteFeedMutation } from "./feedsApiSlice";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import SingleFeedPageExcerpt from "./SingleFeedPageExcerpt";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const SingleFeedPage = () => {
   const { feedId, batchId } = useParams();
   const navigate = useNavigate();
 
   const [stateFeed, setStateFeed] = useState({});
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [createdDate, setCreatedDate] = useState(String);
   const [purchasedDate, setPurchasedDate] = useState(String);
   const [cost, setCost] = useState(String);
 
-  const { feed } = useGetFeedsQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      feed: data?.entities[feedId],
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true,
   });
 
-  console.log("thisfeed", feed);
-
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
-      batch: data?.entities[batchId],
+  const {
+    feed = {},
+    isLoading: isFeedLoading,
+    isError: isFeedError,
+    isSuccess: isFeedSuccess,
+    error: feedError,
+  } = useGetFeedsQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      feed: data?.entities[feedId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
   const [deleteFeed, { isLoading }] = useDeleteFeedMutation();
 
   useEffect(() => {
-    setLoading(true);
-    if (feed && batch) {
+    if (Object.keys(feed)?.length && Object.keys(batch)?.length) {
       setStateFeed(feed);
-      console.log("infeed", feed);
 
       setCreatedDate(feed.createdAt);
       setPurchasedDate(feed.datePurchased);
@@ -49,15 +62,7 @@ const SingleFeedPage = () => {
       }).format(Object.values(feed?.amountPurchased)[0]);
 
       setCost(formattedCost);
-
-      setStateError(false);
-
-      setLoading(false);
-    } else {
-      setStateError(true);
-      setLoading(false);
     }
-    return () => setStateError(false);
   }, [feed, batch]);
 
   const handleClick = () => {
@@ -89,8 +94,13 @@ const SingleFeedPage = () => {
   };
 
   return (
-    <div>
-      {stateFeed && !stateError ? (
+    <>
+      {!isBatchLoading &&
+      isBatchSuccess &&
+      !isFeedLoading &&
+      isFeedSuccess &&
+      Object.keys(feed)?.length &&
+      Object.keys(batch)?.length ? (
         <SingleFeedPageExcerpt
           stateFeed={stateFeed}
           cost={cost}
@@ -102,8 +112,23 @@ const SingleFeedPage = () => {
           isLoading={isLoading}
         />
       ) : null}
-      {!loading && stateError ? <p>Feed Does not exist</p> : null}
-    </div>
+
+      {isBatchSuccess &&
+      isFeedSuccess &&
+      Object.keys(batch)?.length &&
+      !Object.keys(feed)?.length ? (
+        <p>Feed Does not Exist </p>
+      ) : null}
+
+      {isBatchLoading || isFeedLoading ? <PulseLoader color="green" /> : null}
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isFeedLoading && isFeedError ? (
+        <p>{feedError?.data?.message ?? "Failed to Load Feed Details"}</p>
+      ) : null}
+    </>
   );
 };
 

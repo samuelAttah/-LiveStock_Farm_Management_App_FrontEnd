@@ -5,17 +5,30 @@ import { useAddNewOtherExpenseMutation } from "./otherExpensesApiSlice";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const CreateOtherExpensePage = () => {
   const { batchId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  //RTK QUERY FOR FETCHING BATCH
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
+  //MANAGING COMPONENT STATE
   const [formData, setFormData] = useState({
     itemName: "",
     cost: "",
@@ -27,6 +40,7 @@ const CreateOtherExpensePage = () => {
 
   const [datePurchased, setDatePurchased] = useState(dayjs());
 
+  //RTK QUERY FOR MUTATION
   const [createOtherExpense, { isLoading, isError, error, isSuccess }] =
     useAddNewOtherExpenseMutation();
 
@@ -35,7 +49,7 @@ const CreateOtherExpensePage = () => {
   );
 
   useEffect(() => {
-    if (batch) {
+    if (Object.keys(batch)?.length) {
       setStateBatch(batch);
     }
   }, [batch]);
@@ -60,6 +74,7 @@ const CreateOtherExpensePage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    setFetchError("");
     setFormData((prevData) => {
       return { ...prevData, [name]: value };
     });
@@ -81,20 +96,37 @@ const CreateOtherExpensePage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <CreateOtherExpensePageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      datePurchased={datePurchased}
-      setDatePurchased={setDatePurchased}
-      stateBatch={stateBatch}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>InActive Batches Can't Create New Details</p>
+  return (
+    <>
+      {isBatchSuccess &&
+      Object.keys(stateBatch)?.length &&
+      stateBatch?.isActive ? (
+        <CreateOtherExpensePageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          datePurchased={datePurchased}
+          setDatePurchased={setDatePurchased}
+          stateBatch={stateBatch}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {!isBatchLoading &&
+      isBatchSuccess &&
+      Object.keys(stateBatch)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can't Create New Details</p>
+      ) : null}
+
+      {isBatchLoading && <PulseLoader color="green" />}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+    </>
   );
 };
 

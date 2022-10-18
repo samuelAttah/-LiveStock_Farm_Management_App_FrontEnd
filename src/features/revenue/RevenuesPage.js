@@ -49,13 +49,15 @@ const RevenuesPage = () => {
 
       <Divider sx={{ mb: "15px" }} />
       {stateRevenues?.length && !stateError
-        ? stateRevenues.map((revenue) => (
-            <RevenuesPageExcerpt
-              key={revenue.id}
-              revenue={revenue}
-              batchId={batchId}
-            />
-          ))
+        ? stateRevenues
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((revenue) => (
+              <RevenuesPageExcerpt
+                key={revenue.id}
+                revenue={revenue}
+                batchId={batchId}
+              />
+            ))
         : null}
       {isLoading ? <p>Loading Revenues</p> : null}
       {isSuccess && !stateError && !isLoading && !stateRevenues?.length ? (

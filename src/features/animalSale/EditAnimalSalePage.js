@@ -14,15 +14,36 @@ const EditAnimalSalePage = () => {
   const { batchId, animalSaleId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
-      batch: data?.entities[batchId],
+  const {
+    animalSale = {},
+    isError: isSaleError,
+    isLoading: isSaleLoading,
+    isSuccess: isSaleSuccess,
+    error: saleError,
+  } = useGetAnimalSalesQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      animalSale: data?.entities[animalSaleId],
+      isError,
+      isSuccess,
+      isLoading,
+      error,
     }),
+    refetchOnMountOrArgChange: true,
   });
 
-  const { animalSale } = useGetAnimalSalesQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      revenue: data?.entities[animalSaleId],
+  const {
+    batch = {},
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    isError: isBatchError,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      batch: data?.entities[batchId],
+      isLoading,
+      isError,
+      isSuccess,
+      error,
     }),
   });
 
@@ -45,7 +66,7 @@ const EditAnimalSalePage = () => {
   );
 
   useEffect(() => {
-    if (batch && animalSale) {
+    if (Object.keys(batch)?.length && Object?.keys(animalSale)?.length) {
       setStateBatch(batch);
       setFormData({
         numberSold: Number(animalSale?.numberSold),
@@ -99,20 +120,46 @@ const EditAnimalSalePage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <EditAnimalSalePageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      dateSold={dateSold}
-      setDateSold={setDateSold}
-      stateBatch={stateBatch}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can't be Updated</p>
+  return (
+    <>
+      {isBatchSuccess &&
+      isSaleSuccess &&
+      Object?.keys(stateBatch)?.length &&
+      Object.keys(animalSale)?.length &&
+      stateBatch?.isActive ? (
+        <EditAnimalSalePageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          dateSold={dateSold}
+          setDateSold={setDateSold}
+          stateBatch={stateBatch}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {isBatchSuccess &&
+      isSaleSuccess &&
+      Object?.keys(stateBatch)?.length &&
+      Object.keys(animalSale)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can't be Updated</p>
+      ) : null}
+
+      {isBatchSuccess &&
+      isSaleSuccess &&
+      !Object?.keys(stateBatch)?.length &&
+      !Object.keys(animalSale)?.length ? (
+        <p>Animal Sale Does not Exist</p>
+      ) : null}
+
+      {isBatchError && !isBatchLoading ? (
+        <p>{batchError?.data?.message}</p>
+      ) : null}
+      {isSaleError && !isSaleLoading ? <p>{saleError?.data?.message}</p> : null}
+    </>
   );
 };
 

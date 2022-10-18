@@ -9,35 +9,58 @@ import {
 import SingleAnimalSalePageExcerpt from "./SingleAnimalSalePageExcerpt";
 
 const SingleAnimalSalePage = () => {
-  const { animalSaleId, batchId } = useParams();
+  const { batchId, animalSaleId } = useParams();
   const navigate = useNavigate();
 
   const [stateAnimalSale, setStateAnimalSale] = useState({});
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [stateError, setStateError] = useState("");
   const [createdDate, setCreatedDate] = useState(String);
   const [dateSold, setDateSold] = useState(String);
   const [costPerUnit, setCostPerUnit] = useState(String);
   const [totalCost, setTotalCost] = useState(String);
 
-  const { animalSale } = useGetAnimalSalesQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      revenue: data?.entities[animalSaleId],
+  const {
+    animalSale = {},
+    isError: isSaleError,
+    isLoading: isSaleLoading,
+    isSuccess: isSaleSuccess,
+    error: saleError,
+  } = useGetAnimalSalesQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      animalSale: data?.entities[animalSaleId],
+      isError,
+      isSuccess,
+      isLoading,
+      error,
     }),
     refetchOnMountOrArgChange: true,
   });
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    isError: isBatchError,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
       batch: data?.entities[batchId],
+      isLoading,
+      isError,
+      isSuccess,
+      error,
     }),
   });
 
   const [deleteAnimalSale, { isLoading }] = useDeleteAnimalSaleMutation();
 
   useEffect(() => {
-    setLoading(true);
-    if (animalSale && batch) {
+    if (
+      isBatchSuccess &&
+      isSaleSuccess &&
+      Object.keys(batch)?.length &&
+      Object?.keys(animalSale)?.length
+    ) {
       setStateAnimalSale(animalSale);
 
       setCreatedDate(animalSale?.createdAt);
@@ -55,16 +78,20 @@ const SingleAnimalSalePage = () => {
 
       setCostPerUnit(formattedCostPerUnit);
       setTotalCost(formattedTotalCost);
-
-      setStateError(false);
-
-      setLoading(false);
-    } else {
-      setStateError(true);
-      setLoading(false);
     }
-    return () => setStateError(false);
-  }, [animalSale, batch]);
+  }, [animalSale, batch, isBatchSuccess, isSaleSuccess]);
+
+  useEffect(() => {
+    if (isBatchError) {
+      setStateError(batchError?.data?.message);
+    }
+  }, [isBatchError, batchError]);
+
+  useEffect(() => {
+    if (isSaleError) {
+      setStateError(saleError?.data?.message);
+    }
+  }, [isSaleError, saleError]);
 
   const handleClick = () => {
     navigate(`/batch/${batchId}/animalsales/${animalSaleId}/edit`);
@@ -96,7 +123,10 @@ const SingleAnimalSalePage = () => {
 
   return (
     <div>
-      {stateAnimalSale && !stateError ? (
+      {!isBatchLoading &&
+      !isSaleLoading &&
+      Object.keys?.(stateAnimalSale)?.length &&
+      !stateError ? (
         <SingleAnimalSalePageExcerpt
           stateAnimalSale={stateAnimalSale}
           costPerUnit={costPerUnit}
@@ -109,7 +139,19 @@ const SingleAnimalSalePage = () => {
           isLoading={isLoading}
         />
       ) : null}
-      {!loading && stateError ? <p>Revenue Does not exist</p> : null}
+      {!isBatchLoading &&
+      !isSaleLoading &&
+      !batchError &&
+      !saleError &&
+      !Object.keys?.(stateAnimalSale)?.length ? (
+        <p>Animal Sale Does not exist</p>
+      ) : null}
+      {!isBatchLoading && !isSaleLoading && isBatchError ? (
+        <p>{batchError?.data?.message}</p>
+      ) : null}
+      {!isBatchLoading && !isSaleLoading && isSaleError ? (
+        <p>{saleError?.data?.message}</p>
+      ) : null}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Outlet,
   useNavigate,
@@ -22,48 +22,81 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+import Collapse from "@mui/material/Collapse";
 import Tooltip from "@mui/material/Tooltip";
-import LogoutSharpIcon from "@mui/icons-material/LogoutSharp";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import AccountCircleSharpIcon from "@mui/icons-material/AccountCircleSharp";
+import WorkspacesIcon from "@mui/icons-material/Workspaces";
+import PersonIcon from "@mui/icons-material/Person";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import { toast } from "react-toastify";
 import AppBar from "./AppBar";
 import DrawerHeader from "./DrawerHeader";
 import Main from "./Main";
-
+import ExpandMore from "./ExpandMore";
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
 import { useGetBatchesQuery } from "../../features/batches/batchApiSlice";
+import { useGetUserDetailQuery } from "../../features/user/userApiSlice";
 import BatchNavComponent from "./BatchNavComponent";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const drawerWidth = 240;
 
 export default function PersistentDrawerLeft() {
   const { batchId } = useParams();
 
-  const [batch, setBatch] = useState({});
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
+  const [anchorElUser, setAnchorElUser] = useState(null);
 
-  const { fetchedBatch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
-      fetchedBatch: data?.entities[batchId],
+  //RTK CUSTOM HOOKS
+  const { data: batches = {}, isSuccess: isBatchesSuccess } =
+    useGetBatchesQuery("batchesList", {
+      refetchOnMountOrArgChange: true,
+    });
+
+  const fetchedBatches = Object.keys(batches)?.length
+    ? batches?.ids.map((id) => {
+        return batches?.entities[id];
+      })
+    : [];
+
+  const {
+    batch = {},
+    isError,
+    isLoading,
+    isSuccess,
+    error,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
-  useEffect(() => {
-    setLoading(true);
-    if (fetchedBatch) {
-      setBatch(fetchedBatch);
-      setStateError(false);
+  const {
+    data: userDetails = {},
+    // isError,
+    // isLoading,
+    // error,
+  } = useGetUserDetailQuery("userList", {
+    refetchOnMountOrArgChange: true,
+  });
 
-      setLoading(false);
-      console.log("dasboardbatch", fetchedBatch);
-    } else {
-      setStateError(true);
-      setLoading(false);
-    }
-    return () => setStateError(false);
-  }, [fetchedBatch]);
+  const arrayOfUserDetails = Object.keys(userDetails)?.length
+    ? userDetails?.ids.map((id) => {
+        return userDetails?.entities[id];
+      })
+    : [];
+
+  const singleUserDetail = arrayOfUserDetails?.[0];
 
   const [logout] = useSendLogoutMutation();
 
@@ -91,6 +124,32 @@ export default function PersistentDrawerLeft() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleProfile = () => {
+    navigate("/dashboard/userdetails");
+    setAnchorElUser(null);
+  };
+
+  const handleDashboard = () => {
+    navigate("/dashboard");
+    setAnchorElUser(null);
+  };
+
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
+  const handleExpandClick = () => {
+    setExpanded((prev) => !prev);
+  };
+
+  const handleSettingsExpandClick = () => {
+    setSettingsExpanded((prev) => !prev);
   };
 
   return (
@@ -125,15 +184,53 @@ export default function PersistentDrawerLeft() {
             Farm Diary
           </Typography>
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Log Out">
-              <IconButton
-                sx={{ p: 0, backgroundColor: "grey" }}
-                color="secondary"
-                onClick={handleLogout}
-              >
-                <LogoutSharpIcon fontSize="medium" />
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                {singleUserDetail?.profilePicture ? (
+                  <Box
+                    borderRadius={100}
+                    sx={{ backgroundColor: "whitesmoke" }}
+                    paddingX={1}
+                    paddingY={0.5}
+                  >
+                    <img
+                      src={singleUserDetail?.profilePicture}
+                      alt="Profile_Picture"
+                      height={25}
+                      width={25}
+                    />
+                  </Box>
+                ) : (
+                  <AccountCircleSharpIcon fontSize="large" color="secondary" />
+                )}
               </IconButton>
             </Tooltip>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              <MenuItem onClick={handleProfile}>
+                <Typography textAlign="center">Profile</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleDashboard}>
+                <Typography textAlign="center"> Dashboard</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>
+                <Typography textAlign="center"> Logout</Typography>
+              </MenuItem>
+            </Menu>
           </Box>
         </Toolbar>
       </AppBar>
@@ -161,36 +258,129 @@ export default function PersistentDrawerLeft() {
         </DrawerHeader>
         <Divider />
         <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleExpandClick}>
+              <ListItemIcon>
+                <WorkspacesIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Batches"} />
+            </ListItemButton>
+            <ExpandMore
+              expand={expanded}
+              onClick={handleExpandClick}
+              aria-expanded={expanded}
+              aria-label="show more"
+            >
+              <ExpandMoreIcon />
+            </ExpandMore>
+          </ListItem>
+          <Collapse in={expanded} timeout="auto" unmountOnExit>
+            {isBatchesSuccess && fetchedBatches?.length > 10
+              ? fetchedBatches
+                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                  .slice(0, 10)
+                  .map((batch) => (
+                    <ListItem key={batch.id} disablePadding>
+                      <ListItemButton
+                        onClick={() => navigate(`/batch/${batch.id}`)}
+                      >
+                        <ListItemText primary={batch.batchTitle} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))
+              : isBatchesSuccess && fetchedBatches?.length <= 10
+              ? fetchedBatches
+                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                  .map((batch) => (
+                    <ListItem key={batch.id} disablePadding>
+                      <ListItemButton
+                        onClick={() => navigate(`/batch/${batch.id}`)}
+                      >
+                        <ListItemText primary={batch.batchTitle} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))
+              : null}
+          </Collapse>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => navigate("/dashboard/userdetails")}>
+              <ListItemIcon>
+                <PersonIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Profile"} />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleSettingsExpandClick}>
+              <ListItemIcon>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Settings"} />
+            </ListItemButton>
+            <ExpandMore
+              expand={settingsExpanded}
+              onClick={handleSettingsExpandClick}
+              aria-expanded={settingsExpanded}
+              aria-label="show more"
+            >
+              <ExpandMoreIcon />
+            </ExpandMore>
+          </ListItem>
+          <Collapse in={settingsExpanded} timeout="auto" unmountOnExit>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => navigate("/dashboard/verifycurrentpassword")}
+              >
+                <ListItemText primary={"Password Reset"} />
               </ListItemButton>
             </ListItem>
-          ))}
+          </Collapse>
+
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => navigate("/dashboard/documentation")}
+            >
+              <ListItemIcon>
+                <LibraryBooksIcon />
+              </ListItemIcon>
+              <ListItemText primary={"App Manual"} />
+            </ListItemButton>
+          </ListItem>
         </List>
         <Divider />
+
         <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleLogout}>
+              <ListItemIcon>
+                <PowerSettingsNewIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Log Out"} />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
-        {batch && !stateError ? <Outlet /> : null}
-        {!loading && stateError ? <p>Batch Does not exist</p> : null}
-        {batch && !stateError ? <BatchNavComponent batch={batch} /> : null}
+
+        {isSuccess && Object.keys(batch)?.length ? <Outlet /> : null}
+
+        {!isLoading && !Object.keys(batch)?.length && isSuccess ? (
+          <p>Batch Does not exist</p>
+        ) : null}
+
+        {!isLoading && isSuccess && Object.keys(batch)?.length ? (
+          <BatchNavComponent batch={batch} />
+        ) : null}
+
+        {isLoading && <PulseLoader color="green" />}
+
+        {!isLoading && isError ? (
+          <p>{error?.data?.message ?? "Failed to Load Batch"}</p>
+        ) : null}
+
         <Box paddingBottom={15} />
         <Footer />
       </Main>

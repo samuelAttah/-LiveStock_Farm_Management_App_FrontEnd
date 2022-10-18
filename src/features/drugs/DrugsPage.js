@@ -49,9 +49,11 @@ const DrugsPage = () => {
 
       <Divider sx={{ mb: "15px" }} />
       {stateDrugs?.length && !stateError
-        ? stateDrugs.map((drug) => (
-            <DrugsPageExcerpt key={drug.id} drug={drug} batchId={batchId} />
-          ))
+        ? stateDrugs
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((drug) => (
+              <DrugsPageExcerpt key={drug.id} drug={drug} batchId={batchId} />
+            ))
         : null}
       {isLoading ? <p>Loading Drugs</p> : null}
       {isSuccess && !stateError && !isLoading && !stateDrugs?.length ? (

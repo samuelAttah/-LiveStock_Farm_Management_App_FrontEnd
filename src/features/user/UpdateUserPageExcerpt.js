@@ -254,9 +254,9 @@ const UpdateUserPageExcerpt = ({
                 type="address"
                 id="farmAddress"
                 label="company/farm address"
-                name="farmAddress"
+                name="workAddress"
                 placeholder="Company Address or Farm Address"
-                value={formData.farmAddress}
+                value={formData.workAddress}
                 fullWidth
                 maxRows={2}
                 size="small"

@@ -12,13 +12,81 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AutoStoriesSharpIcon from "@mui/icons-material/AutoStoriesSharp";
 import AccountCircleSharpIcon from "@mui/icons-material/AccountCircleSharp";
-
-const pages = ["Home", "About", "Contact", "Blog"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+import { useSelector } from "react-redux";
+import { selectCurrentToken } from "../../features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
+import { useGetUserDetailQuery } from "../../features/user/userApiSlice";
 
 const Header = () => {
+  //Get Access Token from state
+  const accessToken = useSelector(selectCurrentToken);
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+  const [logout] = useSendLogoutMutation();
+
+  const navigate = useNavigate();
+
+  const {
+    data: userDetails = {},
+    // isError,
+    // isLoading,
+    // error,
+  } = useGetUserDetailQuery("userList", {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const arrayOfUserDetails = Object.keys(userDetails)?.length
+    ? userDetails?.ids.map((id) => {
+        return userDetails?.entities[id];
+      })
+    : [];
+
+  const singleUserDetail = arrayOfUserDetails?.[0];
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      toast.success("LogOut Success", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+      });
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  const handleHome = () => {
+    navigate("/");
+  };
+
+  const handleContact = () => {
+    navigate("/contact");
+  };
+
+  const handleAbout = () => {
+    navigate("/about");
+  };
+
+  const handleSignup = () => {
+    navigate("/register");
+  };
+
+  const handleProfile = () => {
+    navigate("/dashboard/userdetails");
+  };
+
+  const handleDashboard = () => {
+    navigate("/dashboard");
+  };
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -90,11 +158,18 @@ const Header = () => {
                 display: { xs: "block", md: "none" },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem onClick={handleHome}>
+                <Typography textAlign="center">Home</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleAbout}>
+                <Typography textAlign="center">About</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleContact}>
+                <Typography textAlign="center">Contact</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>
+                <Typography textAlign="center">Log Out</Typography>
+              </MenuItem>
             </Menu>
           </Box>
           <AutoStoriesSharpIcon
@@ -119,45 +194,103 @@ const Header = () => {
             Farm Diary
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
+            <Button
+              onClick={handleHome}
+              sx={{ my: 2, color: "white", display: "block" }}
+            >
+              Home
+            </Button>
+            <Button
+              onClick={handleAbout}
+              sx={{ my: 2, color: "white", display: "block" }}
+            >
+              About
+            </Button>
+            <Button
+              onClick={handleContact}
+              sx={{ my: 2, color: "white", display: "block" }}
+            >
+              Contact
+            </Button>
+            {accessToken ? (
               <Button
-                key={page}
-                onClick={handleCloseNavMenu}
+                onClick={handleLogout}
                 sx={{ my: 2, color: "white", display: "block" }}
               >
-                {page}
+                LogOut
               </Button>
-            ))}
+            ) : (
+              <Button
+                onClick={handleLogin}
+                sx={{ my: 2, color: "white", display: "block" }}
+              >
+                Log In
+              </Button>
+            )}
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <AccountCircleSharpIcon fontSize="large" color="secondary" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
+            {accessToken ? (
+              <>
+                <Tooltip title="Open settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    {singleUserDetail?.profilePicture ? (
+                      <Box
+                        borderRadius={100}
+                        sx={{ backgroundColor: "whitesmoke" }}
+                        paddingX={1}
+                        paddingY={0.5}
+                      >
+                        <img
+                          src={singleUserDetail?.profilePicture}
+                          alt="Profile_Picture"
+                          height={25}
+                          width={25}
+                        />
+                      </Box>
+                    ) : (
+                      <AccountCircleSharpIcon
+                        fontSize="large"
+                        color="secondary"
+                      />
+                    )}
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  <MenuItem onClick={handleProfile}>
+                    <Typography textAlign="center">Profile</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={handleDashboard}>
+                    <Typography textAlign="center"> Dashboard</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <Typography textAlign="center"> Logout</Typography>
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button
+                onClick={handleSignup}
+                sx={{ my: 2, color: "white", display: "block" }}
+              >
+                SIGN UP
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>

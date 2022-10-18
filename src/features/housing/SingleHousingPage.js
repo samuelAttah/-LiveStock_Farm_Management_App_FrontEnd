@@ -7,6 +7,7 @@ import {
 import SingleHousingPageExcerpt from "./SingleHousingPageExcerpt";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const SingleHousingPage = () => {
   const { housingId, batchId } = useParams();
@@ -14,32 +15,47 @@ const SingleHousingPage = () => {
 
   //Component States
   const [stateHousing, setStateHousing] = useState([]);
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [createdDate, setCreatedDate] = useState("");
   const [datePurchased, setDatePurchased] = useState("");
   const [cost, setCost] = useState("");
 
-  const { house } = useGetHousingsQuery(batchId, {
-    selectFromResult: ({ data }) => ({
-      house: data?.entities[housingId],
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
-    refetchOnMountOrArgChange: true,
   });
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
-      batch: data?.entities[batchId],
+  const {
+    house = {},
+    isError: isHouseError,
+    isLoading: isHouseLoading,
+    isSuccess: isHouseSuccess,
+    error: houseError,
+  } = useGetHousingsQuery(batchId, {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      house: data?.entities[housingId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
   const [deleteHousing, { isLoading }] = useDeleteHousingMutation();
 
   useEffect(() => {
-    setLoading(true);
-    if (house && batch) {
+    if (Object.keys(house)?.length && Object.keys(batch)?.length) {
       setStateHousing(house);
-      console.log("inhouse", house);
 
       setCreatedDate(house?.createdAt?.split("T")[0]);
       setDatePurchased(house?.datePurchased?.split("T")[0]);
@@ -50,15 +66,7 @@ const SingleHousingPage = () => {
       }).format(Object.values(house?.cost)[0]);
 
       setCost(formattedCost);
-
-      setStateError(false);
-
-      setLoading(false);
-    } else {
-      setStateError(true);
-      setLoading(false);
     }
-    return () => setStateError(false);
   }, [house, batch]);
 
   const handleClick = () => {
@@ -91,7 +99,10 @@ const SingleHousingPage = () => {
 
   return (
     <div>
-      {stateHousing && !stateError ? (
+      {isBatchSuccess &&
+      isHouseSuccess &&
+      Object.keys(batch)?.length &&
+      Object.keys(house)?.length ? (
         <SingleHousingPageExcerpt
           stateHousing={stateHousing}
           cost={cost}
@@ -103,7 +114,24 @@ const SingleHousingPage = () => {
           isLoading={isLoading}
         />
       ) : null}
-      {!loading && stateError ? <p>Property Does not exist</p> : null}
+
+      {!isHouseLoading &&
+      !isBatchLoading &&
+      !isHouseError &&
+      !isBatchError &&
+      !Object.keys(stateHousing)?.length ? (
+        <p>Property Does not exist</p>
+      ) : null}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isHouseLoading && isHouseError ? (
+        <p>{houseError?.data?.message ?? "Failed to Load Property Details"}</p>
+      ) : null}
+
+      {isHouseLoading || isBatchLoading ? <PulseLoader color="green" /> : null}
     </div>
   );
 };

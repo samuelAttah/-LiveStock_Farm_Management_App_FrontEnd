@@ -1,10 +1,12 @@
 import { useGetFeedsQuery } from "./feedsApiSlice";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import FeedsPageExcerpt from "./FeedsPageExcerpt";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const FeedsPage = () => {
   const { batchId } = useParams();
@@ -13,7 +15,23 @@ const FeedsPage = () => {
   const [stateError, setStateError] = useState(null);
 
   const {
-    data: feeds,
+    batch = {},
+    // isError: isBatchError,
+    // isLoading: isBatchLoading,
+    // isSuccess: isBatchSuccess,
+    // error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
+    }),
+  });
+
+  const {
+    data: feeds = {},
     isError,
     isLoading,
     isSuccess,
@@ -28,9 +46,8 @@ const FeedsPage = () => {
           })
         : [];
       setStateFeeds(allFeeds);
-      console.log("stateFeeds", allFeeds);
     } else if (isError) {
-      setStateError(error);
+      setStateError(error?.data?.message);
     }
   }, [isError, error, isSuccess, feeds]);
 
@@ -40,20 +57,29 @@ const FeedsPage = () => {
         <Typography fontWeight="bold">
           List of All Feeds Purchased for this Batch
         </Typography>
-        <Link to={`/batch/${batchId}/feeds/create`}>NEW FEED</Link>
+        {batch?.isActive ? (
+          <Link to={`/batch/${batchId}/feeds/create`}>NEW FEED</Link>
+        ) : null}
       </Box>
 
       <Divider sx={{ mb: "15px" }} />
-      {stateFeeds?.length && !stateError
-        ? stateFeeds.map((feed) => (
-            <FeedsPageExcerpt key={feed.id} feed={feed} batchId={batchId} />
-          ))
+      {isSuccess && stateFeeds?.length && !stateError
+        ? stateFeeds
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((feed) => (
+              <FeedsPageExcerpt key={feed.id} feed={feed} batchId={batchId} />
+            ))
         : null}
-      {isLoading ? <p>Loading Feeds</p> : null}
+
+      {isLoading ? <PulseLoader color="green" /> : null}
+
       {isSuccess && !stateError && !isLoading && !stateFeeds?.length ? (
         <p>No Feeds Purchased so far in this Batch</p>
       ) : null}
-      {!isLoading && stateError ? <p>{stateError}</p> : null}
+
+      {!isLoading && isError ? (
+        <p>{stateError ?? "Failed to Load Feeds"}</p>
+      ) : null}
     </div>
   );
 };

@@ -31,7 +31,7 @@ function AnimalSalesPageExcerpt({ animalSale, batchId }) {
                 color="primary.main"
                 fontWeight="bold"
               >
-                VIEW SALES
+                VIEW SALE
               </Typography>
             </Link>
           </CardContent>

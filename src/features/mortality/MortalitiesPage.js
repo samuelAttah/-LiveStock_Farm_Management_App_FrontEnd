@@ -49,13 +49,15 @@ const MortalitiesPage = () => {
 
       <Divider sx={{ mb: "15px" }} />
       {stateDeaths?.length && !stateError
-        ? stateDeaths.map((death) => (
-            <MortalitiesPageExcerpt
-              key={death.id}
-              death={death}
-              batchId={batchId}
-            />
-          ))
+        ? stateDeaths
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((death) => (
+              <MortalitiesPageExcerpt
+                key={death.id}
+                death={death}
+                batchId={batchId}
+              />
+            ))
         : null}
       {isLoading ? <p>Loading Mortalities</p> : null}
       {isSuccess && !stateError && !isLoading && !stateDeaths?.length ? (

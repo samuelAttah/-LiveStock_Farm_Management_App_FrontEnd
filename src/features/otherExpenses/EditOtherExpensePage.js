@@ -8,20 +8,41 @@ import {
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const EditOtherExpensePage = () => {
   const { batchId, expenseId } = useParams();
   const navigate = useNavigate();
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
       batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
     }),
   });
 
-  const { expense } = useGetOtherExpensesQuery(batchId, {
-    selectFromResult: ({ data }) => ({
+  const {
+    expense = {},
+    isLoading: isExpenseLoading,
+    isError: isExpenseError,
+    isSuccess: isExpenseSuccess,
+    error: expenseError,
+  } = useGetOtherExpensesQuery(batchId, {
+    selectFromResult: ({ data, isLoading, isError, isSuccess, error }) => ({
       expense: data?.entities[expenseId],
+      isLoading,
+      isError,
+      isSuccess,
+      error,
     }),
   });
 
@@ -44,7 +65,7 @@ const EditOtherExpensePage = () => {
   );
 
   useEffect(() => {
-    if (batch && expense) {
+    if (Object.keys(batch)?.length && Object.keys(expense)?.length) {
       setStateBatch(batch);
       setFormData({
         itemName: expense?.itemName,
@@ -90,7 +111,7 @@ const EditOtherExpensePage = () => {
       batchId: batchId,
       expenseId: expenseId,
     };
-    console.log("payLoad", payLoad);
+
     try {
       await updateOtherExpense(payLoad).unwrap();
     } catch (error) {
@@ -98,20 +119,53 @@ const EditOtherExpensePage = () => {
     }
   };
 
-  return stateBatch?.isActive ? (
-    <EditOtherExpensePageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      canSave={canSave}
-      datePurchased={datePurchased}
-      setDatePurchased={setDatePurchased}
-      stateBatch={stateBatch}
-      isLoading={isLoading}
-      fetchError={fetchError}
-    />
-  ) : (
-    <p>Inactive Batches Can't Update Details</p>
+  return (
+    <>
+      {isBatchSuccess &&
+      isExpenseSuccess &&
+      Object.keys(stateBatch)?.length &&
+      Object.keys(expense)?.length &&
+      stateBatch?.isActive ? (
+        <EditOtherExpensePageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          canSave={canSave}
+          datePurchased={datePurchased}
+          setDatePurchased={setDatePurchased}
+          stateBatch={stateBatch}
+          isLoading={isLoading}
+          fetchError={fetchError}
+        />
+      ) : null}
+
+      {isBatchSuccess &&
+      isExpenseSuccess &&
+      Object.keys(stateBatch)?.length &&
+      Object.keys(expense)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can't Update Details</p>
+      ) : null}
+
+      {isBatchSuccess &&
+      isExpenseSuccess &&
+      !Object.keys(stateBatch)?.length &&
+      !Object.keys(expense)?.length ? (
+        <p>This Expense Does not exist</p>
+      ) : null}
+
+      {isBatchLoading || isExpenseLoading ? (
+        <PulseLoader color="green" />
+      ) : null}
+
+      {!isBatchLoading && isBatchError ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+
+      {!isExpenseLoading && isExpenseError ? (
+        <p>{expenseError?.data?.message ?? "Failed to Load Expense Details"}</p>
+      ) : null}
+    </>
   );
 };
 

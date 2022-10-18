@@ -24,7 +24,7 @@ const UpdateUserPage = () => {
     homeAddress: "",
     occupation: "",
     farmName: "",
-    farmAddress: "",
+    workAddress: "",
   });
 
   const [birthDay, setBirthDay] = useState(dayjs());
@@ -69,7 +69,7 @@ const UpdateUserPage = () => {
         email: singleUserDetail?.email ?? "",
         homeAddress: singleUserDetail?.homeAddress ?? "",
         farmName: singleUserDetail?.farmName ?? "",
-        farmAddress: singleUserDetail?.farmAddress ?? "",
+        workAddress: singleUserDetail?.workAddress ?? "",
         occupation: singleUserDetail?.occupation ?? "",
       });
       setPhoneValue(`+${String(singleUserDetail?.phoneNumber)}` ?? null);
