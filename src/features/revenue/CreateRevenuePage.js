@@ -89,7 +89,7 @@ const CreateRevenuePage = () => {
       dateSold: dateSold.format("YYYY-MM-DD"),
       batchId: batchId,
     };
-    console.log("payLoad", payLoad);
+
     try {
       await createRevenue(payLoad);
     } catch (error) {

@@ -84,7 +84,6 @@ const CreateFeedPage = () => {
       datePurchased: datePurchased.format("YYYY-MM-DD"),
       batchId: batchId,
     };
-    console.log("payLoad", payLoad);
     try {
       await createFeed(payLoad).unwrap();
     } catch (error) {

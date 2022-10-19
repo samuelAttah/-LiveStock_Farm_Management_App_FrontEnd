@@ -21,8 +21,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
               return detail;
             })
           : responseData;
-
-        console.log("userDetails", loadedDetails);
         return user.setAll(initialState, loadedDetails);
       },
       providesTags: (result, error, arg) => {

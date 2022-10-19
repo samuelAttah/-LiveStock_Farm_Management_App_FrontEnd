@@ -127,7 +127,7 @@ const UserPage = () => {
         singleUserDetail?.username,
         localFile
       )(async (url) => {
-        console.log("Downloadurl", url);
+        // console.log("Downloadurl", url);
         await doUpload({ profilePicture: url }).unwrap();
         setLocalFile(null);
         setErrors("");

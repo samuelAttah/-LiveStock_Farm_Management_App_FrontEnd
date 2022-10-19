@@ -117,7 +117,6 @@ const EditHousingPage = () => {
       batchId: batchId,
       housingId: housingId,
     };
-    console.log("payLoad", payLoad);
     try {
       await updateHousing(payLoad);
     } catch (error) {

@@ -81,7 +81,6 @@ const CreateFeedPageExcerpt = ({
             value={datePurchased}
             onChange={(newValue) => {
               setDatePurchased(newValue);
-              console.log("datePurchased", newValue.toISOString());
             }}
             renderInput={(params) => <TextField {...params} fullWidth />}
           />

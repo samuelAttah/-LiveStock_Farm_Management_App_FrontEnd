@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import MenuItem from "@mui/material/MenuItem";
 import farmAnimalsList from "../../common/utils/farmAnimalsList";
+
 const CreateBatchPage = () => {
   const navigate = useNavigate();
 
@@ -77,7 +78,6 @@ const CreateBatchPage = () => {
       datePurchased: datePurchased.format("YYYY-MM-DD"),
     };
 
-    console.log("payLoad", payLoad);
     try {
       await createBatch(payLoad);
     } catch (error) {

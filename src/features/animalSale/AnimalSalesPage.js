@@ -1,3 +1,4 @@
+import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useGetAnimalSalesQuery } from "./animalSaleApiSlice";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -12,15 +13,30 @@ const AnimalSalesPage = () => {
   const [stateAnimalSales, setStateAnimalSales] = useState([]);
   const [stateError, setStateError] = useState(null);
 
+  const {
+    batch = {},
+    // isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    // error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
+    }),
+  });
+
   //FETCHING DATA WITH USEGETANIMALSALESQUERY
   const {
-    data: animalSales,
+    data: animalSales = {},
     isLoading,
     isError,
     isSuccess,
     error,
   } = useGetAnimalSalesQuery(batchId, {
-    refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
 
@@ -32,7 +48,6 @@ const AnimalSalesPage = () => {
           })
         : [];
       setStateAnimalSales(allAnimalSales);
-      console.log("stateAnimalSales", allAnimalSales);
     } else if (isError) {
       setStateError(error?.data?.message);
     }
@@ -44,7 +59,9 @@ const AnimalSalesPage = () => {
         <Typography fontWeight="bold">
           List of All Revenues Generated from Animal Sales in this Batch
         </Typography>
-        <Link to={`/batch/${batchId}/animalsales/create`}>NEW SALE</Link>
+        {isBatchSuccess && !isBatchLoading && batch?.isActive ? (
+          <Link to={`/batch/${batchId}/animalsales/create`}>NEW SALE</Link>
+        ) : null}
       </Box>
 
       <Divider sx={{ mb: "15px" }} />

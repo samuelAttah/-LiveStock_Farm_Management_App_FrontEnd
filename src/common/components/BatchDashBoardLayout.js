@@ -122,7 +122,7 @@ export default function PersistentDrawerLeft() {
       });
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.log(error?.data?.message ?? "Failed to Log out");
     }
   };
 

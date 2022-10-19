@@ -29,9 +29,9 @@ const Footer = () => {
         paddingTop: "30px",
       }}
     >
-      <Typography variant="h6" align="center" gutterBottom>
+      {/* <Typography variant="h6" align="center" gutterBottom>
         Footer
-      </Typography>
+      </Typography> */}
       <Typography
         variant="subtitle1"
         align="center"

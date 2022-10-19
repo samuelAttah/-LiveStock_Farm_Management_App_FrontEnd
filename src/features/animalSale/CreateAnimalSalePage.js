@@ -13,7 +13,7 @@ const CreateAnimalSalePage = () => {
   const navigate = useNavigate();
 
   const {
-    batch,
+    batch = {},
     isError: isBatchError,
     isLoading: isBatchLoading,
     isSuccess: isBatchSuccess,
@@ -47,7 +47,7 @@ const CreateAnimalSalePage = () => {
   );
 
   useEffect(() => {
-    if (batch) {
+    if (Object.keys(batch)?.length) {
       setStateBatch(batch);
     }
   }, [batch]);
@@ -85,7 +85,7 @@ const CreateAnimalSalePage = () => {
       dateSold: dateSold.format("YYYY-MM-DD"),
       batchId: batchId,
     };
-    console.log("payLoad", payLoad);
+
     try {
       await createAnimalSale(payLoad);
     } catch (error) {

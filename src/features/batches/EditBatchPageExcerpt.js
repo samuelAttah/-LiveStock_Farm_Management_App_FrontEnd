@@ -126,7 +126,6 @@ const EditBatchPageExcerpt = ({
           getOptionLabel={(option) => option.code}
           onChange={(event, newValue) => {
             setCurrency(newValue);
-            console.log("newValue", newValue);
           }}
           renderOption={(props, option) => (
             <Box
@@ -167,7 +166,6 @@ const EditBatchPageExcerpt = ({
             value={datePurchased}
             onChange={(newValue) => {
               setDatePurchased(newValue);
-              console.log("datePurchased", newValue.toISOString());
             }}
             renderInput={(params) => (
               <TextField

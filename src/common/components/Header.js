@@ -60,20 +60,24 @@ const Header = () => {
     }
   };
 
-  const handleLogin = () => {
-    navigate("/login");
-  };
-
   const handleHome = () => {
     navigate("/");
+    setAnchorElNav(null);
   };
 
   const handleContact = () => {
     navigate("/contact");
+    setAnchorElNav(null);
   };
 
   const handleAbout = () => {
     navigate("/about");
+    setAnchorElNav(null);
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+    setAnchorElNav(null);
   };
 
   const handleSignup = () => {
@@ -167,9 +171,16 @@ const Header = () => {
               <MenuItem onClick={handleContact}>
                 <Typography textAlign="center">Contact</Typography>
               </MenuItem>
-              <MenuItem onClick={handleLogout}>
-                <Typography textAlign="center">Log Out</Typography>
-              </MenuItem>
+
+              {accessToken ? (
+                <MenuItem onClick={handleLogout}>
+                  <Typography textAlign="center">Log Out</Typography>
+                </MenuItem>
+              ) : (
+                <MenuItem onClick={handleLogin}>
+                  <Typography textAlign="center">Log In</Typography>
+                </MenuItem>
+              )}
             </Menu>
           </Box>
           <AutoStoriesSharpIcon

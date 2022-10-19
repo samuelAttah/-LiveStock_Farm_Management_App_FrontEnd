@@ -110,7 +110,7 @@ const EditDrugPage = () => {
       drugId: drugId,
       batchId: batchId,
     };
-    console.log("payLoad", payLoad);
+
     try {
       await editDrug(payLoad);
     } catch (error) {

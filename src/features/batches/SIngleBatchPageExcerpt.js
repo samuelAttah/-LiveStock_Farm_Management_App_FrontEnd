@@ -7,15 +7,26 @@ const SIngleBatchPageExcerpt = ({
   createdDate,
   costPerUnit,
   totalPurchaseCost,
+  handleSummary,
   handleClick,
   handleDelete,
   isLoading,
 }) => {
   return (
     <>
-      <Typography color="gray" fontSize="20px">
-        {stateBatch?.batchTitle}
-      </Typography>
+      <Box
+        display="flex"
+        flexDirection="row"
+        justifyContent="space-evenly"
+        alignItems="center"
+      >
+        <Typography color="gray" fontSize="20px" textAlign="left">
+          {stateBatch?.batchTitle}
+        </Typography>
+        <Button size="small" variant="outlined" onClick={handleSummary}>
+          Batch Summary
+        </Button>
+      </Box>
       <Divider />
       <Box display="flex" flexDirection="row" justifyContent="left" my="8px">
         {" "}

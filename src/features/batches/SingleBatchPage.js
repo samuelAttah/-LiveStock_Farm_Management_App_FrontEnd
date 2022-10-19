@@ -3,21 +3,31 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useGetBatchesQuery, useDeleteBatchMutation } from "./batchApiSlice";
 import SIngleBatchPageExcerpt from "./SIngleBatchPageExcerpt";
 import { toast } from "react-toastify";
+import PulseLoader from "react-spinners/PulseLoader";
+
 const SingleBatchPage = () => {
   const { batchId } = useParams();
 
   const navigate = useNavigate();
 
-  const [stateBatch, setStateBatch] = useState([]);
-  const [stateError, setStateError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [stateBatch, setStateBatch] = useState({});
   const [createdDate, setCreatedDate] = useState(String);
   const [costPerUnit, setCostPerUnit] = useState(String);
   const [totalPurchaseCost, setTotalPurchaseCost] = useState(String);
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    isError: isBatchError,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
       batch: data?.entities[batchId],
+      isLoading,
+      isError,
+      isSuccess,
+      error,
     }),
     refetchOnMountOrArgChange: true,
   });
@@ -25,8 +35,7 @@ const SingleBatchPage = () => {
   const [deleteBatch, { isLoading }] = useDeleteBatchMutation();
 
   useEffect(() => {
-    setLoading(true);
-    if (batch) {
+    if (Object.keys(batch)?.length) {
       setStateBatch(batch);
 
       setCreatedDate(batch.createdAt);
@@ -44,15 +53,7 @@ const SingleBatchPage = () => {
       setTotalPurchaseCost(formattedTotalPurchaseCost);
 
       setCostPerUnit(formattedCostPerUnit);
-
-      setStateError(false);
-
-      setLoading(false);
-    } else {
-      setStateError(true);
-      setLoading(false);
     }
-    return () => setStateError(false);
   }, [batch]);
 
   const handleClick = () => {
@@ -77,9 +78,13 @@ const SingleBatchPage = () => {
       });
     }
   };
+
+  const handleSummary = () => {
+    navigate(`/batch/${batchId}/summary`);
+  };
   return (
-    <div>
-      {stateBatch && !stateError ? (
+    <>
+      {isBatchSuccess && Object.keys(stateBatch)?.length ? (
         <SIngleBatchPageExcerpt
           stateBatch={stateBatch}
           costPerUnit={costPerUnit}
@@ -87,11 +92,21 @@ const SingleBatchPage = () => {
           createdDate={createdDate}
           handleClick={handleClick}
           handleDelete={handleDelete}
+          handleSummary={handleSummary}
           isLoading={isLoading}
         />
       ) : null}
-      {!loading && stateError ? <p>Batch Does not exist</p> : null}
-    </div>
+
+      {!isBatchLoading && isBatchSuccess & !Object.keys(stateBatch)?.length ? (
+        <p>Batch Does not exist</p>
+      ) : null}
+
+      {isBatchLoading && <PulseLoader color="green" />}
+
+      {isBatchError && !isBatchLoading ? (
+        <p>{batchError?.data?.message ?? "Failed to Load Batch Details"}</p>
+      ) : null}
+    </>
   );
 };
 

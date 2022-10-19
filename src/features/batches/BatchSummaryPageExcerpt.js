@@ -8,7 +8,7 @@ import BatchSummaryExpensesExcerpt from "./BatchSummaryExpensesExcerpt";
 import BatchSummaryDescriptionExcerpt from "./BatchSummaryDescriptionExcerpt";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import BatchSummaryPDFfile from "./BatchSummaryPDFfile";
-import CardMedia from "@mui/material/CardMedia";
+// import CardMedia from "@mui/material/CardMedia";
 import blue from "@mui/material/colors/blue";
 
 const BatchSummaryPageExcerpt = ({
@@ -58,12 +58,11 @@ const BatchSummaryPageExcerpt = ({
           </Grid>
           <Grid item xs={3} md={3}>
             {singleUserDetail?.companyLogo ? (
-              <CardMedia
-                component="img"
-                height="60"
-                width="60"
-                image={singleUserDetail?.companyLogo}
-                alt="company picture"
+              <img
+                src={singleUserDetail?.companyLogo}
+                alt="farm logo"
+                height={60}
+                width={80}
               />
             ) : (
               <Typography>Update Farm/Company Logo</Typography>

@@ -17,8 +17,8 @@ const FeedsPage = () => {
   const {
     batch = {},
     // isError: isBatchError,
-    // isLoading: isBatchLoading,
-    // isSuccess: isBatchSuccess,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
     // error: batchError,
   } = useGetBatchesQuery("batchesList", {
     selectFromResult: ({ data, isError, isLoading, error, isSuccess }) => ({
@@ -57,7 +57,7 @@ const FeedsPage = () => {
         <Typography fontWeight="bold">
           List of All Feeds Purchased for this Batch
         </Typography>
-        {batch?.isActive ? (
+        {isBatchSuccess && !isBatchLoading && batch?.isActive ? (
           <Link to={`/batch/${batchId}/feeds/create`}>NEW FEED</Link>
         ) : null}
       </Box>

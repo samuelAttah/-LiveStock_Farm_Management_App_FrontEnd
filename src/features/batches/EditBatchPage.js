@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import MenuItem from "@mui/material/MenuItem";
 import farmAnimalsList from "../../common/utils/farmAnimalsList";
 import dayjs from "dayjs";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const EditBatchPage = () => {
   const navigate = useNavigate();
@@ -20,9 +21,19 @@ const EditBatchPage = () => {
     batchTitle: "",
   });
 
-  const { batch } = useGetBatchesQuery("batchesList", {
-    selectFromResult: ({ data }) => ({
+  const {
+    batch = {},
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    isError: isBatchError,
+    error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
       batch: data?.entities[batchId],
+      isLoading,
+      isError,
+      isSuccess,
+      error,
     }),
   });
 
@@ -30,7 +41,7 @@ const EditBatchPage = () => {
 
   const [datePurchased, setDatePurchased] = useState(dayjs());
 
-  const [stateBatch, setStateBatch] = useState();
+  const [stateBatch, setStateBatch] = useState({});
 
   const [fetchError, setFetchError] = useState("");
 
@@ -45,7 +56,7 @@ const EditBatchPage = () => {
   ].every(Boolean);
 
   useEffect(() => {
-    if (batch) {
+    if (Object.keys(batch)?.length) {
       setStateBatch(batch);
       const currencyEntry = countryCurrencyList.find(
         (currency) => currency.code === batch.countryCode
@@ -105,7 +116,6 @@ const EditBatchPage = () => {
       datePurchased: datePurchased.format("YYYY-MM-DD"),
     };
 
-    console.log("payLoad", payLoad);
     try {
       await editBatch(payLoad);
     } catch (error) {
@@ -113,23 +123,39 @@ const EditBatchPage = () => {
     }
   };
 
-  return batch?.isActive ? (
-    <EditBatchPageExcerpt
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      currency={currency}
-      setCurrency={setCurrency}
-      canSave={canSave}
-      isLoading={isLoading}
-      fetchError={fetchError}
-      stateBatch={stateBatch}
-      animalTypeOptions={animalTypeOptions}
-      datePurchased={datePurchased}
-      setDatePurchased={setDatePurchased}
-    />
-  ) : (
-    <p>Inactive Batches Can not be Updated </p>
+  return (
+    <>
+      {isBatchSuccess &&
+      Object.keys(stateBatch)?.length &&
+      stateBatch?.isActive ? (
+        <EditBatchPageExcerpt
+          formData={formData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          currency={currency}
+          setCurrency={setCurrency}
+          canSave={canSave}
+          isLoading={isLoading}
+          fetchError={fetchError}
+          stateBatch={stateBatch}
+          animalTypeOptions={animalTypeOptions}
+          datePurchased={datePurchased}
+          setDatePurchased={setDatePurchased}
+        />
+      ) : null}
+
+      {isBatchSuccess &&
+      Object.keys(stateBatch)?.length &&
+      !stateBatch?.isActive ? (
+        <p>Inactive Batches Can not be Updated </p>
+      ) : null}
+
+      {isBatchLoading && <PulseLoader color="green" />}
+
+      {isBatchError && !isBatchLoading ? (
+        <p>{batchError?.data?.message ?? "Failed to load Batch"}</p>
+      ) : null}
+    </>
   );
 };
 

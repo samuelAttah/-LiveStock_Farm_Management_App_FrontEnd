@@ -1,3 +1,4 @@
+import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useGetOtherExpensesQuery } from "./otherExpensesApiSlice";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -12,8 +13,25 @@ const OtherExpensesPage = () => {
   const [stateExpenses, setStateExpenses] = useState([]);
   const [stateError, setStateError] = useState(null);
 
+  //USING RTK HOOK TO FETCH BATCH
   const {
-    data: expenses,
+    batch = {},
+    // isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    // error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
+    }),
+  });
+
+  const {
+    data: expenses = {},
     isError,
     isLoading,
     isSuccess,
@@ -28,7 +46,6 @@ const OtherExpensesPage = () => {
           })
         : [];
       setStateExpenses(allOtherExpenses);
-      console.log("stateExpenses", allOtherExpenses);
     } else if (isError) {
       setStateError(error?.data?.message);
     }
@@ -40,9 +57,11 @@ const OtherExpensesPage = () => {
         <Typography fontWeight="bold">
           List of Other/Miscellaneous Expenses for this Batch
         </Typography>
-        <Link to={`/batch/${batchId}/otherexpenses/create`}>
-          NEW MISCELLANEOUS EXPENSE
-        </Link>
+        {isBatchSuccess && !isBatchLoading && batch?.isActive ? (
+          <Link to={`/batch/${batchId}/otherexpenses/create`}>
+            NEW MISCELLANEOUS EXPENSE
+          </Link>
+        ) : null}
       </Box>
 
       <Divider sx={{ mb: "15px" }} />

@@ -59,7 +59,6 @@ const LoginPage = () => {
     if (!formIsValid()) return;
     try {
       const { accessToken } = await login(formData).unwrap();
-      console.log(accessToken);
       dispatch(setCredentials({ accessToken }));
       toast.success("Login Success", {
         position: "bottom-right",

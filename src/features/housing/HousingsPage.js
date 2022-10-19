@@ -1,4 +1,5 @@
 import { useGetHousingsQuery } from "./housingApiSlice";
+import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import HousingsPageExcerpt from "./HousingsPageExcerpt";
@@ -12,9 +13,26 @@ const HousingsPage = () => {
   const [stateHousings, setStateHousings] = useState([]);
   const [stateError, setStateError] = useState(null);
 
+  //USING RTK HOOK TO FETCH BATCH
+  const {
+    batch = {},
+    // isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    // error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
+    }),
+  });
+
   //FETCHING DATA WITH USEGETDRUGSQUERY
   const {
-    data: housings,
+    data: housings = {},
     isLoading,
     isError,
     isSuccess,
@@ -32,7 +50,6 @@ const HousingsPage = () => {
           })
         : [];
       setStateHousings(allHousings);
-      console.log("stateDrugs", allHousings);
     } else if (isError) {
       setStateError(error);
     }
@@ -44,7 +61,9 @@ const HousingsPage = () => {
         <Typography fontWeight="bold">
           List of All Properties Purchased for this Batch
         </Typography>
-        <Link to={`/batch/${batchId}/housings/create`}>NEW HOUSING</Link>
+        {isBatchSuccess && !isBatchLoading && batch?.isActive ? (
+          <Link to={`/batch/${batchId}/housings/create`}>NEW HOUSING</Link>
+        ) : null}
       </Box>
 
       <Divider sx={{ mb: "15px" }} />

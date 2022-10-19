@@ -194,7 +194,7 @@ const UpdateUserPage = () => {
           singleUserDetail?.username,
           localFile
         )(async (url) => {
-          console.log("Downloadurl", url);
+          // console.log("Downloadurl", url);
           await doUpdate({ ...payLoad, companyLogo: url }).unwrap();
           setLocalFile(null);
           setErrors("");

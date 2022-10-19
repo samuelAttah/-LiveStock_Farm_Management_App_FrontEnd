@@ -118,7 +118,7 @@ const EditMortalityPage = () => {
     };
 
     try {
-      await updateMortality(payLoad);
+      await updateMortality(payLoad).unwrap();
     } catch (error) {
       setFetchError(error?.data?.message);
     }

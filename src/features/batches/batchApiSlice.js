@@ -22,7 +22,7 @@ export const batchesApiSlice = apiSlice.injectEndpoints({
         },
       }),
       transformResponse: (responseData, meta, arg) => {
-        console.log("responseData", responseData);
+        // console.log("responseData", responseData);
         const loadedBatches = responseData?.length
           ? responseData.map((batch) => {
               batch.id = batch._id;

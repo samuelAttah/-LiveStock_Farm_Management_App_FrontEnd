@@ -106,7 +106,6 @@ const EditFeedPage = () => {
       batchId: batchId,
       feedId: feedId,
     };
-    console.log("payLoad", payLoad);
     try {
       await updateFeed(payLoad).unwrap();
     } catch (error) {

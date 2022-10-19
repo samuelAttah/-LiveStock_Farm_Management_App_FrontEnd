@@ -1,4 +1,5 @@
 import { useGetDrugsQuery } from "./drugsApiSlice";
+import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import DrugsPageExcerpt from "./DrugsPageExcerpt";
@@ -12,6 +13,23 @@ const DrugsPage = () => {
   const [stateDrugs, setStateDrugs] = useState([]);
   const [stateError, setStateError] = useState(null);
 
+  //USING RTK HOOK TO FETCH BATCH
+  const {
+    batch = {},
+    // isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    // error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
+    }),
+  });
+
   //FETCHING DATA WITH USEGETDRUGSQUERY
   const {
     data: drugs,
@@ -20,7 +38,6 @@ const DrugsPage = () => {
     isSuccess,
     error,
   } = useGetDrugsQuery(batchId, {
-    refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
 
@@ -32,7 +49,6 @@ const DrugsPage = () => {
           })
         : [];
       setStateDrugs(allDrugs);
-      console.log("stateDrugs", allDrugs);
     } else if (isError) {
       setStateError(error);
     }
@@ -44,7 +60,9 @@ const DrugsPage = () => {
         <Typography fontWeight="bold">
           List of All Drugs Purchased for this Batch
         </Typography>
-        <Link to={`/batch/${batchId}/drugs/create`}>NEW DRUG</Link>
+        {isBatchSuccess && !isBatchLoading && batch?.isActive ? (
+          <Link to={`/batch/${batchId}/drugs/create`}>NEW DRUG</Link>
+        ) : null}
       </Box>
 
       <Divider sx={{ mb: "15px" }} />

@@ -85,7 +85,7 @@ const CreateMortalityPage = () => {
       deathDate: deathDate.format("YYYY-MM-DD"),
       batchId: batchId,
     };
-    console.log("payLoad", payLoad);
+
     try {
       await createMortality(payLoad);
     } catch (error) {

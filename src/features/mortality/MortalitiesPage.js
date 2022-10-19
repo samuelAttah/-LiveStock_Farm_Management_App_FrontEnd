@@ -1,3 +1,4 @@
+import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useGetMortalitysQuery } from "./mortalityApiSlice";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -12,15 +13,31 @@ const MortalitiesPage = () => {
   const [stateDeaths, setStateDeaths] = useState([]);
   const [stateError, setStateError] = useState(null);
 
+  //USING RTK HOOK TO FETCH BATCH
+  const {
+    batch = {},
+    // isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    // error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
+    }),
+  });
+
   //FETCHING DATA WITH USEGETMORTALITYSQUERY
   const {
-    data: deaths,
+    data: deaths = {},
     isLoading,
     isError,
     isSuccess,
     error,
   } = useGetMortalitysQuery(batchId, {
-    refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
 
@@ -32,7 +49,6 @@ const MortalitiesPage = () => {
           })
         : [];
       setStateDeaths(allDeaths);
-      console.log("stateDeaths", allDeaths);
     } else if (isError) {
       setStateError(error);
     }
@@ -44,7 +60,9 @@ const MortalitiesPage = () => {
         <Typography fontWeight="bold">
           List of All Livestock Deaths for this Batch
         </Typography>
-        <Link to={`/batch/${batchId}/mortalities/create`}>NEW DEATH</Link>
+        {isBatchSuccess && !isBatchLoading && batch?.isActive ? (
+          <Link to={`/batch/${batchId}/mortalities/create`}>NEW DEATH</Link>
+        ) : null}
       </Box>
 
       <Divider sx={{ mb: "15px" }} />

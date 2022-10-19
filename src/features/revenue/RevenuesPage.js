@@ -1,3 +1,4 @@
+import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useGetRevenuesQuery } from "./revenueApiSlice";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -11,6 +12,23 @@ const RevenuesPage = () => {
 
   const [stateRevenues, setStateRevenues] = useState([]);
   const [stateError, setStateError] = useState(null);
+
+  //USING RTK HOOK TO FETCH BATCH
+  const {
+    batch = {},
+    // isError: isBatchError,
+    isLoading: isBatchLoading,
+    isSuccess: isBatchSuccess,
+    // error: batchError,
+  } = useGetBatchesQuery("batchesList", {
+    selectFromResult: ({ data, isError, isLoading, isSuccess, error }) => ({
+      batch: data?.entities[batchId],
+      isError,
+      isLoading,
+      isSuccess,
+      error,
+    }),
+  });
 
   //FETCHING DATA WITH USEGETREVENUESQUERY
   const {
@@ -32,7 +50,6 @@ const RevenuesPage = () => {
           })
         : [];
       setStateRevenues(allRevenues);
-      console.log("stateRevenues", allRevenues);
     } else if (isError) {
       setStateError(error?.data?.message);
     }
@@ -44,7 +61,9 @@ const RevenuesPage = () => {
         <Typography fontWeight="bold">
           List of Other Revenues Generated for this Batch
         </Typography>
-        <Link to={`/batch/${batchId}/revenues/create`}>NEW REVENUE</Link>
+        {isBatchSuccess && !isBatchLoading && batch?.isActive ? (
+          <Link to={`/batch/${batchId}/revenues/create`}>NEW REVENUE</Link>
+        ) : null}
       </Box>
 
       <Divider sx={{ mb: "15px" }} />

@@ -30,7 +30,7 @@ function DashBoardPageExcerpt({ batch }) {
       await doEndBatch({ id: batch?.id.toString() }).unwrap();
       setOpen(false);
     } catch (error) {
-      console.log(error.data.message);
+      console.log(error?.data?.message ?? "Failed to End Batch");
     }
   };
   return (
