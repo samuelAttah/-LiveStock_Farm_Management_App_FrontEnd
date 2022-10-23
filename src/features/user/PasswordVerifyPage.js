@@ -3,12 +3,15 @@ import PasswordVerifyPageExcerpt from "./PasswordVerifyPageExcerpt";
 import { useVerifyPasswordMutation } from "./userApiSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import useTitle from "../../common/hooks/useTitle";
 
 const PasswordVerifyPage = () => {
+  useTitle("Farm Diary | Verify Password");
   const navigate = useNavigate();
 
   const [fetchError, setFetchError] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [doVerify, { isError, isSuccess, error, isLoading }] =
     useVerifyPasswordMutation();
@@ -20,7 +23,7 @@ const PasswordVerifyPage = () => {
         autoClose: 3000,
         hideProgressBar: false,
       });
-      navigate("/dashboard/resetpassword", {
+      navigate("/dashboard/changepassword", {
         state: { oldPassword: password },
         replace: true,
       });
@@ -36,6 +39,10 @@ const PasswordVerifyPage = () => {
   const handleChange = (e) => {
     setFetchError("");
     setPassword(e.target?.value);
+  };
+
+  const handleShowPassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const canSave = [password].every(Boolean);
@@ -57,6 +64,8 @@ const PasswordVerifyPage = () => {
       canSave={canSave}
       password={password}
       handleChange={handleChange}
+      showPassword={showPassword}
+      handleShowPassword={handleShowPassword}
     />
   );
 };

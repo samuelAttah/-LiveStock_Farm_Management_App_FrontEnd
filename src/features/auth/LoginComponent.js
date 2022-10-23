@@ -9,6 +9,13 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 
 const LoginComponent = ({
   handleSubmit,
@@ -20,6 +27,8 @@ const LoginComponent = ({
   canSave,
   togglePersist,
   persist,
+  showPassword,
+  handleShowPassword,
 }) => {
   return (
     <Container component="main" maxWidth="xs">
@@ -67,19 +76,33 @@ const LoginComponent = ({
               {errors?.username}
             </Typography>
           ) : null}
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            error={errors.password}
-          />
+
+          <FormControl variant="outlined" fullWidth sx={{ mt: 1 }}>
+            <InputLabel htmlFor="password">Password</InputLabel>
+            <OutlinedInput
+              required
+              fullWidth
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              id="password"
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleShowPassword}
+                    // onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              error={errors.password}
+            />
+          </FormControl>
           {errors?.password ? (
             <Typography component="h1" variant="h5">
               {" "}
@@ -100,14 +123,14 @@ const LoginComponent = ({
             type="submit"
             fullWidth
             variant="contained"
-            disabled={!canSave}
+            disabled={!canSave || isLoading}
             sx={{ mt: 3, mb: 2 }}
           >
             {isLoading ? "Signing In" : "Sign In"}
           </Button>
-          <Grid container>
+          <Grid container justifyContent="space-between">
             <Grid item>
-              <Link href="#" variant="body2">
+              <Link href="/forgotpassword" variant="body2">
                 Forgot password?
               </Link>
             </Grid>

@@ -6,8 +6,10 @@ import DrugsPageExcerpt from "./DrugsPageExcerpt";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import useTitle from "../../common/hooks/useTitle";
 
 const DrugsPage = () => {
+  useTitle("Farm Diary | Batch Drugs");
   const { batchId } = useParams();
 
   const [stateDrugs, setStateDrugs] = useState([]);

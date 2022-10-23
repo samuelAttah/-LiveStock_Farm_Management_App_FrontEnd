@@ -43,9 +43,32 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "User", id: "LIST" }],
     }),
+    changepassword: builder.mutation({
+      query: (payLoad) => ({
+        url: "/user/changepassword",
+        method: "POST",
+        body: payLoad,
+      }),
+      invalidatesTags: [{ type: "User", id: "LIST" }],
+    }),
+    forgotPassword: builder.mutation({
+      query: (payLoad) => ({
+        url: "/forgotpassword",
+        method: "POST",
+        body: payLoad,
+      }),
+      invalidatesTags: [{ type: "User", id: "LIST" }],
+    }),
+    verifyResetLink: builder.mutation({
+      query: (payLoad) => ({
+        url: `forgotpassword/${payLoad.id}/${payLoad.token}`,
+        method: "GET",
+      }),
+      invalidatesTags: [{ type: "User", id: "LIST" }],
+    }),
     resetPassword: builder.mutation({
       query: (payLoad) => ({
-        url: "/user/resetpassword",
+        url: `forgotpassword/${payLoad.id}/${payLoad.token}`,
         method: "POST",
         body: payLoad,
       }),
@@ -73,9 +96,12 @@ export const {
   useGetUserDetailQuery,
   useUpdateUserDetailMutation,
   useVerifyPasswordMutation,
-  useResetPasswordMutation,
+  useChangepasswordMutation,
   useUploadProfilePictureMutation,
   useRemoveProfilePictureMutation,
+  useForgotPasswordMutation,
+  useVerifyResetLinkMutation,
+  useResetPasswordMutation,
 } = userApiSlice;
 
 // returns the query result object

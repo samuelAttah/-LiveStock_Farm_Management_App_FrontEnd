@@ -8,8 +8,10 @@ import {
 import { storage } from "../../firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
+import useTitle from "../../common/hooks/useTitle";
 
 const UserPage = () => {
+  useTitle("Farm Diary | User Profile");
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState("");

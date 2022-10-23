@@ -5,8 +5,10 @@ import EditIcon from "@mui/icons-material/Edit";
 const SIngleBatchPageExcerpt = ({
   stateBatch,
   createdDate,
+  purchasedDate,
   costPerUnit,
   totalPurchaseCost,
+  currency,
   handleSummary,
   handleClick,
   handleDelete,
@@ -24,10 +26,11 @@ const SIngleBatchPageExcerpt = ({
           {stateBatch?.batchTitle}
         </Typography>
         <Button size="small" variant="outlined" onClick={handleSummary}>
-          Batch Summary
+          Go To Summary
         </Button>
       </Box>
       <Divider />
+
       <Box display="flex" flexDirection="row" justifyContent="left" my="8px">
         {" "}
         <label style={{ color: "gray" }}>Creation Date: </label>
@@ -53,7 +56,7 @@ const SIngleBatchPageExcerpt = ({
       </Box>
       <Box display="flex" flexDirection="row" justifyContent="left" my="8px">
         <label style={{ color: "gray" }}>Currency: </label>
-        <Typography marginLeft="5px">{stateBatch?.currency}</Typography>
+        <Typography marginLeft="5px">{currency}</Typography>
       </Box>
       <Box display="flex" flexDirection="row" justifyContent="left" my="8px">
         <label style={{ color: "gray" }}>
@@ -66,6 +69,13 @@ const SIngleBatchPageExcerpt = ({
           {`Total Cost of ${stateBatch?.animalType}s:`}{" "}
         </label>
         <Typography marginLeft="5px">{totalPurchaseCost}</Typography>
+      </Box>
+      <Box display="flex" flexDirection="row" justifyContent="left" my="8px">
+        {" "}
+        <label style={{ color: "gray" }}>Purchase Date: </label>
+        <Typography marginLeft="5px">
+          {stateBatch ? purchasedDate.split("T")[0] : null}
+        </Typography>
       </Box>
       {stateBatch?.isActive ? (
         <Box

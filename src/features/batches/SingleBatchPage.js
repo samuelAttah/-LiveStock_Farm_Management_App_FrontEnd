@@ -4,14 +4,17 @@ import { useGetBatchesQuery, useDeleteBatchMutation } from "./batchApiSlice";
 import SIngleBatchPageExcerpt from "./SIngleBatchPageExcerpt";
 import { toast } from "react-toastify";
 import PulseLoader from "react-spinners/PulseLoader";
+import countryCurrencyList from "../../common/utils/countryCurrencyList";
+import useTitle from "../../common/hooks/useTitle";
 
 const SingleBatchPage = () => {
   const { batchId } = useParams();
+  useTitle("Farm Diary | Batch Page");
 
   const navigate = useNavigate();
 
-  const [stateBatch, setStateBatch] = useState({});
   const [createdDate, setCreatedDate] = useState(String);
+  const [purchasedDate, setPurchasedDate] = useState(String);
   const [costPerUnit, setCostPerUnit] = useState(String);
   const [totalPurchaseCost, setTotalPurchaseCost] = useState(String);
 
@@ -36,9 +39,8 @@ const SingleBatchPage = () => {
 
   useEffect(() => {
     if (Object.keys(batch)?.length) {
-      setStateBatch(batch);
-
       setCreatedDate(batch.createdAt);
+      setPurchasedDate(batch.datePurchased);
 
       const formattedTotalPurchaseCost = new Intl.NumberFormat("en-US", {
         style: "currency",
@@ -55,6 +57,11 @@ const SingleBatchPage = () => {
       setCostPerUnit(formattedCostPerUnit);
     }
   }, [batch]);
+
+  const currency = Object.keys(batch)?.length
+    ? countryCurrencyList.find((country) => country.code === batch?.countryCode)
+        .currencyName
+    : "Dollar";
 
   const handleClick = () => {
     navigate(`/batch/${batchId}/edit`);
@@ -84,12 +91,14 @@ const SingleBatchPage = () => {
   };
   return (
     <>
-      {isBatchSuccess && Object.keys(stateBatch)?.length ? (
+      {isBatchSuccess && Object.keys(batch)?.length ? (
         <SIngleBatchPageExcerpt
-          stateBatch={stateBatch}
+          stateBatch={batch}
           costPerUnit={costPerUnit}
+          currency={currency}
           totalPurchaseCost={totalPurchaseCost}
           createdDate={createdDate}
+          purchasedDate={purchasedDate}
           handleClick={handleClick}
           handleDelete={handleDelete}
           handleSummary={handleSummary}
@@ -97,7 +106,7 @@ const SingleBatchPage = () => {
         />
       ) : null}
 
-      {!isBatchLoading && isBatchSuccess & !Object.keys(stateBatch)?.length ? (
+      {!isBatchLoading && isBatchSuccess & !Object.keys(batch)?.length ? (
         <p>Batch Does not exist</p>
       ) : null}
 

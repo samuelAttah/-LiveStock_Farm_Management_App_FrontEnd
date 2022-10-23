@@ -8,8 +8,10 @@ import {
 } from "./revenueApiSlice";
 import SingleRevenuePageExcerpt from "./SingleRevenuePageExcerpt";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const SingleRevenuePage = () => {
+  useTitle("Farm Diary | Batch Other Revenue");
   const { revenueId, batchId } = useParams();
   const navigate = useNavigate();
 

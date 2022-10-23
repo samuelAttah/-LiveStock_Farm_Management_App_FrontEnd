@@ -7,8 +7,10 @@ import {
   useDeleteAnimalSaleMutation,
 } from "./animalSaleApiSlice";
 import SingleAnimalSalePageExcerpt from "./SingleAnimalSalePageExcerpt";
+import useTitle from "../../common/hooks/useTitle";
 
 const SingleAnimalSalePage = () => {
+  useTitle("Farm Diary | Batch Animal Revenue");
   const { batchId, animalSaleId } = useParams();
   const navigate = useNavigate();
 

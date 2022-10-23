@@ -8,8 +8,10 @@ import {
 import SingleMortalityPageExcerpt from "./SingleMortalityPageExcerpt";
 import { toast } from "react-toastify";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const SingleMortalityPage = () => {
+  useTitle("Farm Diary | Batch Mortality");
   const { mortalityId, batchId } = useParams();
   const navigate = useNavigate();
 

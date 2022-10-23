@@ -128,6 +128,8 @@ const BatchSummaryPDFfile = ({
   costPerUnit,
   totalDeadAnimals,
   totalPurchaseCost,
+  purchasedDate,
+  createdDate,
   numberOfTimesFeedExpense,
   formattedTotalAmountSpentOnFeeds,
   numberOfTimesDrugExpense,
@@ -208,6 +210,12 @@ const BatchSummaryPDFfile = ({
               <Text style={styles.starttext}>Cost Per Animal: </Text>
               <Text style={styles.fetchedtext}>{costPerUnit}</Text>
             </View>
+            <View style={styles.singlelineleft}>
+              <Text style={styles.starttext}>Date of Purchase: </Text>
+              <Text style={styles.fetchedtext}>
+                {purchasedDate?.split("T")[0]}
+              </Text>
+            </View>
           </View>
           <View style={styles.secondlinecover}>
             <View style={styles.singlelineleft}>
@@ -221,6 +229,12 @@ const BatchSummaryPDFfile = ({
             <View style={styles.singlelineleft}>
               <Text style={styles.starttext}>Total Purchase Cost: </Text>
               <Text style={styles.fetchedtext}>{totalPurchaseCost}</Text>
+            </View>
+            <View style={styles.singlelineleft}>
+              <Text style={styles.starttext}>Batch Creation Date: </Text>
+              <Text style={styles.fetchedtext}>
+                {createdDate?.split("T")[0]}
+              </Text>
             </View>
           </View>
         </View>

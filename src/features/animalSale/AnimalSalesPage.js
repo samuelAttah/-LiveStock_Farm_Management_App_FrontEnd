@@ -6,8 +6,11 @@ import AnimalSalesPageExcerpt from "./AnimalSalesPageExcerpt";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import useTitle from "../../common/hooks/useTitle";
 
 const AnimalSalesPage = () => {
+  useTitle("Farm Diary | Batch Animal Revenues");
+
   const { batchId } = useParams();
 
   const [stateAnimalSales, setStateAnimalSales] = useState([]);

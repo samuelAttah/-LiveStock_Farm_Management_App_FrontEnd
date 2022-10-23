@@ -7,8 +7,10 @@ import countryCurrencyList from "../../common/utils/countryCurrencyList";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { PulseLoader } from "react-spinners";
+import useTitle from "../../common/hooks/useTitle";
 
 const CreateDrugPage = () => {
+  useTitle("Farm Diary | New Drug");
   const { batchId } = useParams();
   const navigate = useNavigate();
 

@@ -6,8 +6,10 @@ import RevenuesPageExcerpt from "./RevenuesPageExcerpt";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import useTitle from "../../common/hooks/useTitle";
 
 const RevenuesPage = () => {
+  useTitle("Farm Diary | Batch Other Revenues");
   const { batchId } = useParams();
 
   const [stateRevenues, setStateRevenues] = useState([]);

@@ -17,6 +17,7 @@ const BatchSummaryPageExcerpt = ({
   costPerUnit,
   totalPurchaseCost,
   createdDate,
+  purchasedDate,
   numberOfTimesFeedExpense,
   formattedTotalAmountSpentOnFeeds,
   numberOfTimesDrugExpense,
@@ -78,6 +79,8 @@ const BatchSummaryPageExcerpt = ({
           totalDeadAnimals={totalDeadAnimals}
           totalPurchaseCost={totalPurchaseCost}
           costPerUnit={costPerUnit}
+          createdDate={createdDate}
+          purchasedDate={purchasedDate}
         />
         <hr />
         <BatchSummaryExpensesExcerpt
@@ -273,6 +276,8 @@ const BatchSummaryPageExcerpt = ({
           document={
             <BatchSummaryPDFfile
               stateBatch={batch}
+              createdDate={createdDate}
+              purchasedDate={purchasedDate}
               costPerUnit={costPerUnit}
               totalDeadAnimals={totalDeadAnimals}
               totalPurchaseCost={totalPurchaseCost}

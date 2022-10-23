@@ -241,7 +241,7 @@ const UpdateUserPageExcerpt = ({
                 maxRows={2}
                 size="small"
                 onChange={handleChange}
-                inputProps={{ maxLength: 35 }}
+                inputProps={{ maxLength: 30 }}
               />
             </Box>
           </Grid>

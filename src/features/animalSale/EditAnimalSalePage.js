@@ -9,8 +9,10 @@ import { useGetBatchesQuery } from "../batches/batchApiSlice";
 
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import useTitle from "../../common/hooks/useTitle";
 
 const EditAnimalSalePage = () => {
+  useTitle("Farm Diary | Edit Animal Revenue");
   const { batchId, animalSaleId } = useParams();
   const navigate = useNavigate();
 
@@ -112,7 +114,7 @@ const EditAnimalSalePage = () => {
       batchId: batchId,
       animalSaleId: animalSaleId,
     };
-    console.log("payLoad", payLoad);
+
     try {
       await updateAnimalSale(payLoad);
     } catch (error) {

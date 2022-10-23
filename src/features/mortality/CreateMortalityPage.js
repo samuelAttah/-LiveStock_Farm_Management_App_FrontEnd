@@ -6,8 +6,10 @@ import { useAddNewMortalityMutation } from "./mortalityApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const CreateMortalityPage = () => {
+  useTitle("Farm Diary | New Mortality");
   const { batchId } = useParams();
   const navigate = useNavigate();
 

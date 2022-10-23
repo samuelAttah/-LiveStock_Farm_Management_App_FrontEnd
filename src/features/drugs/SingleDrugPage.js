@@ -4,8 +4,10 @@ import { useGetDrugsQuery, useDeleteDrugMutation } from "./drugsApiSlice";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import SingleDrugPageExcerpt from "./SingleDrugPageExcerpt";
 import { toast } from "react-toastify";
+import useTitle from "../../common/hooks/useTitle";
 
 const SingleDrugPage = () => {
+  useTitle("Farm Diary | Batch Drug");
   const { drugId, batchId } = useParams();
 
   const navigate = useNavigate();

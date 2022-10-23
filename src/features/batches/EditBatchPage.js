@@ -8,9 +8,11 @@ import MenuItem from "@mui/material/MenuItem";
 import farmAnimalsList from "../../common/utils/farmAnimalsList";
 import dayjs from "dayjs";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const EditBatchPage = () => {
   const navigate = useNavigate();
+  useTitle("Farm Diary | Edit Batch");
 
   const { batchId } = useParams();
 

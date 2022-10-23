@@ -3,9 +3,11 @@ import { useParams } from "react-router-dom";
 import { useGetBatchesQuery } from "./batchApiSlice";
 import { useGetUserDetailQuery } from "../user/userApiSlice";
 import BatchSummaryPageExcerpt from "./BatchSummaryPageExcerpt";
+import useTitle from "../../common/hooks/useTitle";
 
 const BatchSummaryPage = () => {
   const { batchId } = useParams();
+  useTitle("Farm Diary | Batch Summary");
 
   //USING RTK CUSTOM HOOKS
 
@@ -37,6 +39,7 @@ const BatchSummaryPage = () => {
   const [initialPurchased, setInitialPurchased] = useState(0);
 
   const [createdDate, setCreatedDate] = useState(String);
+  const [purchasedDate, sePurchasedDate] = useState(String);
   const [costPerUnit, setCostPerUnit] = useState(String);
   const [totalPurchaseCost, setTotalPurchaseCost] = useState(String);
 
@@ -45,6 +48,7 @@ const BatchSummaryPage = () => {
       setStateBatch(batch);
 
       setCreatedDate(batch.createdAt);
+      sePurchasedDate(batch?.datePurchased);
 
       const formattedTotalPurchaseCost = new Intl.NumberFormat("en-US", {
         style: "currency",
@@ -226,6 +230,7 @@ const BatchSummaryPage = () => {
             costPerUnit={costPerUnit}
             totalPurchaseCost={totalPurchaseCost}
             createdDate={createdDate}
+            purchasedDate={purchasedDate}
             numberOfTimesFeedExpense={numberOfTimesFeedExpense}
             formattedTotalAmountSpentOnFeeds={formattedTotalAmountSpentOnFeeds}
             numberOfTimesDrugExpense={numberOfTimesDrugExpense}

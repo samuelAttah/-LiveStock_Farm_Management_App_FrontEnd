@@ -1,7 +1,9 @@
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
+import useTitle from "../../common/hooks/useTitle";
 
 const DocumentationPage = () => {
+  useTitle("Farm Diary | App Manual");
   return (
     <Grid item xs={12} md={12} mt={1} padding={4}>
       <Typography component="h6" variant="h6" color="gray">

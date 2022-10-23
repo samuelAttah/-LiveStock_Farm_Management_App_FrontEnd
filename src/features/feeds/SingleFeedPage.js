@@ -5,8 +5,10 @@ import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import SingleFeedPageExcerpt from "./SingleFeedPageExcerpt";
 import { toast } from "react-toastify";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const SingleFeedPage = () => {
+  useTitle("Farm Diary | Batch Feed");
   const { feedId, batchId } = useParams();
   const navigate = useNavigate();
 

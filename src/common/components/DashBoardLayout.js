@@ -307,7 +307,7 @@ export default function DashBoardLayout() {
               <ListItemButton
                 onClick={() => navigate("/dashboard/verifycurrentpassword")}
               >
-                <ListItemText primary={"Password Reset"} />
+                <ListItemText primary={"Change Password"} />
               </ListItemButton>
             </ListItem>
           </Collapse>

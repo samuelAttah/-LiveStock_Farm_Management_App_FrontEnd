@@ -6,8 +6,10 @@ import MortalitiesPageExcerpt from "./MortalitiesPageExcerpt";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import useTitle from "../../common/hooks/useTitle";
 
 const MortalitiesPage = () => {
+  useTitle("Farm Diary | Batch Mortalities");
   const { batchId } = useParams();
 
   const [stateDeaths, setStateDeaths] = useState([]);

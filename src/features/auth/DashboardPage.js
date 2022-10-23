@@ -4,15 +4,18 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
+import { useGetUserDetailQuery } from "../user/userApiSlice";
 import PulseLoader from "react-spinners/PulseLoader";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import DashBoardPageExcerpt from "./DashBoardPageExcerpt";
 import DashBoardPageExcerptInActive from "./DashBoardPageExcerptInActive";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "react";
 import BatchesPagination from "./BatchesPagination";
+import useTitle from "../../common/hooks/useTitle";
 
 const DashboardPage = () => {
+  useTitle("Farm Diary | Dashboard");
   const { username } = useAuth();
   const { greeting } = useGreeting();
 
@@ -48,6 +51,24 @@ const DashboardPage = () => {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
+
+  const {
+    data: userDetails = {},
+    isError: isUserDetailError,
+    isLoading: isUserDetailLoading,
+    isSuccess: isUserDetailSuccess,
+    error: userDetailError,
+  } = useGetUserDetailQuery("userList", {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const arrayOfUserDetails = Object.keys(userDetails)?.length
+    ? userDetails?.ids.map((id) => {
+        return userDetails?.entities[id];
+      })
+    : [];
+
+  const singleUserDetail = arrayOfUserDetails?.[0];
 
   useEffect(() => {
     if (isSuccess) {
@@ -85,72 +106,86 @@ const DashboardPage = () => {
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between">
-        <Typography
-          fontWeight="bold"
-          color="gray"
-        >{`Welcome Back ${username.toUpperCase()}`}</Typography>
-        <Typography fontWeight="bold" fontFamily="cursive">
-          {greeting}
-        </Typography>
-      </Box>
-      <Divider sx={{ mb: "15px" }} />
-      {!isLoading && (
-        <Box display="flex" justifyContent="space-between" mb="10px">
+      {isUserDetailSuccess && singleUserDetail.firstName ? (
+        <>
+          <Box display="flex" justifyContent="space-between">
+            <Typography
+              fontWeight="bold"
+              color="gray"
+            >{`Welcome Back ${username.toUpperCase()}`}</Typography>
+            <Typography fontWeight="bold" fontFamily="cursive">
+              {greeting}
+            </Typography>
+          </Box>
+          <Divider sx={{ mb: "15px" }} />
+          {!isLoading && (
+            <Box display="flex" justifyContent="space-between" mb="10px">
+              <Typography sx={{ mb: "10px" }} fontWeight="bold">
+                {activeBatches?.length
+                  ? `You currently have ${count} active batches`
+                  : "You currently have 0 active batches"}
+              </Typography>
+              <Button onClick={handleClick} variant="contained" size="small">
+                START NEW BATCH
+              </Button>
+            </Box>
+          )}
+
+          {activeBatches?.length
+            ? activeBatches
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .map((batch) => (
+                  <DashBoardPageExcerpt key={batch.id} batch={batch} />
+                ))
+            : null}
+          {!activeBatches?.length && !isLoading && (
+            <p>No Active Batches to Display</p>
+          )}
+          {isError && <p>{error.data?.message}</p>}
+          {isLoading && <PulseLoader color="green" />}
+
+          <BatchesPagination
+            setPagination={(p) => setPagination(p)}
+            count={count}
+            pageSize={pageSize}
+          />
+
           <Typography sx={{ mb: "10px" }} fontWeight="bold">
-            {activeBatches?.length
-              ? `You currently have ${count} active batches`
-              : "You currently have 0 active batches"}
+            {inActiveBatches?.length
+              ? `You currently have ${inActiveCount} inactive batches`
+              : "You currently have 0 inactive batches"}
           </Typography>
-          <Button onClick={handleClick} variant="contained" size="small">
-            START NEW BATCH
-          </Button>
-        </Box>
-      )}
 
-      {activeBatches?.length
-        ? activeBatches
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .map((batch) => (
-              <DashBoardPageExcerpt key={batch.id} batch={batch} />
-            ))
-        : null}
-      {!activeBatches?.length && !isLoading && (
-        <p>No Active Batches to Display</p>
-      )}
-      {isError && <p>{error.data?.message}</p>}
-      {isLoading && <PulseLoader color="green" />}
+          {/* inactive batches */}
+          {inActiveBatches?.length
+            ? inActiveBatches
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .map((batch) => (
+                  <DashBoardPageExcerptInActive key={batch.id} batch={batch} />
+                ))
+            : null}
+          {!inActiveBatches?.length && !isLoading && (
+            <p>No Inactive Batches to Display</p>
+          )}
+          {isError && <p>{error?.data?.message}</p>}
+          {isLoading && <PulseLoader color="green" />}
+          <BatchesPagination
+            setPagination={(p) => setInActivePagination(p)}
+            count={inActiveCount}
+            pageSize={pageSize}
+          />
+        </>
+      ) : null}
 
-      <BatchesPagination
-        setPagination={(p) => setPagination(p)}
-        count={count}
-        pageSize={pageSize}
-      />
+      {isUserDetailSuccess && !singleUserDetail.firstName ? (
+        <Navigate to="/dashboard/updateuserdetails" />
+      ) : null}
 
-      <Typography sx={{ mb: "10px" }} fontWeight="bold">
-        {inActiveBatches?.length
-          ? `You currently have ${inActiveCount} inactive batches`
-          : "You currently have 0 inactive batches"}
-      </Typography>
+      {isUserDetailLoading && <PulseLoader color="green" />}
 
-      {/* inactive batches */}
-      {inActiveBatches?.length
-        ? inActiveBatches
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .map((batch) => (
-              <DashBoardPageExcerptInActive key={batch.id} batch={batch} />
-            ))
-        : null}
-      {!inActiveBatches?.length && !isLoading && (
-        <p>No Inactive Batches to Display</p>
-      )}
-      {isError && <p>{error?.data?.message}</p>}
-      {isLoading && <PulseLoader color="green" />}
-      <BatchesPagination
-        setPagination={(p) => setInActivePagination(p)}
-        count={inActiveCount}
-        pageSize={pageSize}
-      />
+      {isUserDetailError && !isUserDetailLoading ? (
+        <p>{userDetailError?.data?.message ?? "Failed to Load Details"}</p>
+      ) : null}
     </>
   );
 };

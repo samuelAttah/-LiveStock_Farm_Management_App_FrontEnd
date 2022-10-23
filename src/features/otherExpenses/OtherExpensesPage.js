@@ -6,8 +6,10 @@ import OtherExpensesPageExcerpt from "./OtherExpensesPageExcerpt";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import useTitle from "../../common/hooks/useTitle";
 
 const OtherExpensesPage = () => {
+  useTitle("Farm Diary | Bath Miscellaneous Expenses");
   const { batchId } = useParams();
 
   const [stateExpenses, setStateExpenses] = useState([]);

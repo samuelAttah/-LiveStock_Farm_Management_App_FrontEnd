@@ -8,8 +8,10 @@ import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import SingleOtherExpensePageExcerpt from "./SingleOtherExpensePageExcerpt";
 import { toast } from "react-toastify";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const SingleOtherExpensePage = () => {
+  useTitle("Farm Diary | Batch Miscellaneous Expense");
   const { expenseId, batchId } = useParams();
   const navigate = useNavigate();
 

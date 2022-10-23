@@ -8,13 +8,15 @@ import SingleHousingPageExcerpt from "./SingleHousingPageExcerpt";
 import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { toast } from "react-toastify";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const SingleHousingPage = () => {
+  useTitle("Farm Diary | Batch Housing");
   const { housingId, batchId } = useParams();
   const navigate = useNavigate();
 
   //Component States
-  const [stateHousing, setStateHousing] = useState([]);
+  const [stateHousing, setStateHousing] = useState({});
   const [createdDate, setCreatedDate] = useState("");
   const [datePurchased, setDatePurchased] = useState("");
   const [cost, setCost] = useState("");

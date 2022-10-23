@@ -333,7 +333,7 @@ export default function PersistentDrawerLeft() {
               <ListItemButton
                 onClick={() => navigate("/dashboard/verifycurrentpassword")}
               >
-                <ListItemText primary={"Password Reset"} />
+                <ListItemText primary={"Change Password"} />
               </ListItemButton>
             </ListItem>
           </Collapse>

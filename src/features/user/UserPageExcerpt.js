@@ -132,7 +132,8 @@ const UserPageExcerpt = ({
             </Typography>
             {singleUserDetail?.companyLogo ? (
               <img
-                height="100"
+                height="50"
+                width="100"
                 src={singleUserDetail?.companyLogo}
                 alt="company Logo"
               />

@@ -6,8 +6,10 @@ import HousingsPageExcerpt from "./HousingsPageExcerpt";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import useTitle from "../../common/hooks/useTitle";
 
 const HousingsPage = () => {
+  useTitle("Farm Diary | Batch Housings");
   const { batchId } = useParams();
 
   const [stateHousings, setStateHousings] = useState([]);

@@ -7,9 +7,12 @@ import { storage } from "../../firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { useUpdateUserDetailMutation } from "./userApiSlice";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import useTitle from "../../common/hooks/useTitle";
 
 const UpdateUserPage = () => {
-  const [phoneValue, setPhoneValue] = useState();
+  useTitle("Farm Diary | Update Profile");
+  const [phoneValue, setPhoneValue] = useState("");
 
   const navigate = useNavigate();
 
@@ -39,7 +42,7 @@ const UpdateUserPage = () => {
   const [progress, setProgress] = useState(0);
 
   //USING RTK CUSTOM HOOKS
-  const [doUpdate, { isError, isLoading, error, isSuccess }] =
+  const [doUpdate, { isError, isLoading, error }] =
     useUpdateUserDetailMutation();
   const {
     data: userDetails = {},
@@ -72,8 +75,12 @@ const UpdateUserPage = () => {
         workAddress: singleUserDetail?.workAddress ?? "",
         occupation: singleUserDetail?.occupation ?? "",
       });
-      setPhoneValue(`+${String(singleUserDetail?.phoneNumber)}` ?? null);
-      setBirthDay(dayjs(singleUserDetail?.birthDay.split("T")[0]));
+      singleUserDetail?.phoneNumber
+        ? setPhoneValue(`+${String(singleUserDetail?.phoneNumber)}`)
+        : setPhoneValue(null);
+      singleUserDetail?.birthDay
+        ? setBirthDay(dayjs(singleUserDetail?.birthDay.split("T")[0]))
+        : setBirthDay(dayjs());
       setNetworkError("");
     }
   }, [isUserDetailsSuccess, singleUserDetail]);
@@ -85,13 +92,6 @@ const UpdateUserPage = () => {
     }
   }, [isError, error]);
 
-  //USEEFFECT FOR REDIRECTION ON SUCCESS
-  useEffect(() => {
-    if (isSuccess) {
-      navigate("/dashboard/userdetails", { replace: true });
-    }
-  }, [isSuccess, navigate]);
-
   //USEEFFECT FOR VALIDATING EMAIL WITH REGEX
   useEffect(() => {
     setValidEmail(EMAIL_REGEX.test(formData.email));
@@ -99,6 +99,7 @@ const UpdateUserPage = () => {
 
   //HANDLE FORMDATA CHANGES
   const handleChange = (e) => {
+    setNetworkError("");
     const { name, value } = e.target;
     setFormData((prevData) => {
       return { ...prevData, [name]: value };
@@ -196,6 +197,12 @@ const UpdateUserPage = () => {
         )(async (url) => {
           // console.log("Downloadurl", url);
           await doUpdate({ ...payLoad, companyLogo: url }).unwrap();
+          navigate("/dashboard", { replace: true });
+          toast.success("Updated Successfully", {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+          });
           setLocalFile(null);
           setErrors("");
         })((error) => {
@@ -203,6 +210,12 @@ const UpdateUserPage = () => {
         });
       } else {
         await doUpdate(payLoad).unwrap();
+        navigate("/dashboard", { replace: true });
+        toast.success("Updated Successfully", {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+        });
       }
     } catch (error) {
       setNetworkError(error?.data?.message);

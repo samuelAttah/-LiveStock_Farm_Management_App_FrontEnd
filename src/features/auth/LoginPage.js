@@ -7,11 +7,14 @@ import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import usePersistUser from "../../common/hooks/usePersistUser";
 import { setCredentials } from "./authSlice";
 import { selectCurrentToken } from "./authSlice";
+import useTitle from "../../common/hooks/useTitle";
 
 const LoginPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  useTitle("Farm Diary | Login");
+
   const from = location.state?.from?.pathname || "/dashboard";
 
   const [login, { isLoading }] = useLoginMutation();
@@ -29,12 +32,18 @@ const LoginPage = () => {
 
   const [errors, setErrors] = useState({});
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFetchError("");
     setFormData((prevData) => {
       return { ...prevData, [name]: value };
     });
+  };
+
+  const handleShowPassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const formIsValid = () => {
@@ -84,6 +93,8 @@ const LoginPage = () => {
       canSave={canSave}
       togglePersist={togglePersist}
       persist={persist}
+      handleShowPassword={handleShowPassword}
+      showPassword={showPassword}
     />
   );
 };

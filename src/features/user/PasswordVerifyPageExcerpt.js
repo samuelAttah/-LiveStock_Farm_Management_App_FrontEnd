@@ -2,9 +2,15 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Avatar from "@mui/material/Avatar";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 
 const PasswordVerifyPageExcerpt = ({
   fetchError,
@@ -13,6 +19,8 @@ const PasswordVerifyPageExcerpt = ({
   canSave,
   password,
   handleChange,
+  showPassword,
+  handleShowPassword,
 }) => {
   return (
     <Container component="main" maxWidth="xs">
@@ -22,7 +30,7 @@ const PasswordVerifyPageExcerpt = ({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingY: 15,
+          paddingTop: 12,
         }}
       >
         {fetchError ? (
@@ -37,33 +45,45 @@ const PasswordVerifyPageExcerpt = ({
         <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
           <LockOutlinedIcon />
         </Avatar>
-        <Typography component="h6" variant="h6">
-          Enter Current Password
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
+      </Box>
+      <Typography component="h6" variant="h6">
+        Enter Current Password
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <FormControl variant="outlined" fullWidth sx={{ mt: 1 }}>
+          <InputLabel htmlFor="password">Password</InputLabel>
+          <OutlinedInput
             required
             fullWidth
             name="password"
             value={password}
             onChange={handleChange}
             label="Password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             id="password"
-            autoComplete="current-password"
-            // error={errors.password}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleShowPassword}
+                  // onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
           />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            disabled={!canSave || isLoading}
-            sx={{ mt: 3, mb: 2 }}
-          >
-            {isLoading ? "Verifying..." : "Verify"}
-          </Button>
-        </Box>
+        </FormControl>
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          disabled={!canSave || isLoading}
+          sx={{ mt: 3, mb: 2 }}
+        >
+          {isLoading ? "Verifying..." : "Verify"}
+        </Button>
       </Box>
     </Container>
   );

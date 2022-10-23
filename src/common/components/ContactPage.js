@@ -7,8 +7,10 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import MailIcon from "@mui/icons-material/Mail";
 import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
 import { Link } from "@mui/material";
+import useTitle from "../hooks/useTitle";
 
 const ContactPage = () => {
+  useTitle("Farm Diary | Contact Us");
   return (
     <Grid item xs={12} md={12} mt={10} padding={4}>
       <Typography component="h6" variant="h6" color="gray">

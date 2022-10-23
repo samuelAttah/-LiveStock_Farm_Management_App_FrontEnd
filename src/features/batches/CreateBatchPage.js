@@ -7,9 +7,11 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import MenuItem from "@mui/material/MenuItem";
 import farmAnimalsList from "../../common/utils/farmAnimalsList";
+import useTitle from "../../common/hooks/useTitle";
 
 const CreateBatchPage = () => {
   const navigate = useNavigate();
+  useTitle("Farm Diary | Create Batch");
 
   const [formData, setFormData] = useState({
     animalType: "",

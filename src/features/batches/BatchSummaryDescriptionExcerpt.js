@@ -8,6 +8,8 @@ const BatchSummaryDescriptionExcerpt = ({
   totalDeadAnimals,
   costPerUnit,
   totalPurchaseCost,
+  createdDate,
+  purchasedDate,
 }) => {
   return (
     <>
@@ -80,6 +82,29 @@ const BatchSummaryDescriptionExcerpt = ({
             </Typography>
             <Typography ml={1} textAlign="left">
               {totalPurchaseCost}
+            </Typography>
+          </Box>
+        </Grid>
+      </Grid>
+      <Grid container spacing={1} mb={1}>
+        <Grid item xs={12} md={6}>
+          <Box display="flex" flexDirection="row">
+            <Typography fontWeight="bold" textAlign="left">
+              Date of Purchase:
+            </Typography>
+            <Typography ml={1} textAlign="left">
+              {purchasedDate.split("T")[0]}
+            </Typography>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Box display="flex" flexDirection="row">
+            <Typography fontWeight="bold" textAlign="left">
+              {" "}
+              Batch Creation Date:{" "}
+            </Typography>
+            <Typography ml={1} textAlign="left">
+              {createdDate.split("T")[0]}
             </Typography>
           </Box>
         </Grid>

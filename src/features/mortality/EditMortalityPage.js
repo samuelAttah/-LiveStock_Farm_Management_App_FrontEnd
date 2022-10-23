@@ -9,8 +9,10 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const EditMortalityPage = () => {
+  useTitle("Farm Diary | Edit Mortality");
   const { batchId, mortalityId } = useParams();
   const navigate = useNavigate();
 

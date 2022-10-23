@@ -7,8 +7,10 @@ import PulseLoader from "react-spinners/PulseLoader";
 
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import useTitle from "../../common/hooks/useTitle";
 
 const CreateAnimalSalePage = () => {
+  useTitle("Farm Diary | New Animal Revenue");
   const { batchId } = useParams();
   const navigate = useNavigate();
 

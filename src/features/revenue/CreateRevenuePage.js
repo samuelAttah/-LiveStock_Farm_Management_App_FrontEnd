@@ -6,8 +6,10 @@ import { useGetBatchesQuery } from "../batches/batchApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../common/hooks/useTitle";
 
 const CreateRevenuePage = () => {
+  useTitle("Farm Diary | New Other Revenue");
   const { batchId } = useParams();
   const navigate = useNavigate();
 

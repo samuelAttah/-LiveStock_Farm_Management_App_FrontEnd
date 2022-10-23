@@ -53,10 +53,12 @@ import EditOtherExpensePage from "../features/otherExpenses/EditOtherExpensePage
 import UserPage from "../features/user/UserPage";
 import UpdateUserPage from "../features/user/UpdateUserPage";
 import PasswordVerifyPage from "../features/user/PasswordVerifyPage";
-import PasswordResetPage from "../features/user/PasswordResetPage";
+import ChangePasswordPage from "../features/user/ChangePasswordPage";
 import AboutPage from "../common/components/AboutPage";
 import ContactPage from "../common/components/ContactPage";
 import DocumentationPage from "../features/user/DocumentationPage";
+import EmailVerifyPage from "../features/user/EmailVerifyPage";
+import ResetPasswordPage from "../features/user/ResetPasswordPage";
 
 const App = () => {
   return (
@@ -70,6 +72,11 @@ const App = () => {
               <Route path="login" element={<LoginPage />} />
               <Route path="about" element={<AboutPage />} />
               <Route path="contact" element={<ContactPage />} />
+              <Route path="forgotpassword" element={<EmailVerifyPage />} />
+              <Route
+                path="password-reset/:id/:token"
+                element={<ResetPasswordPage />}
+              />
             </Route>
 
             {/* ProtectedRoutes */}
@@ -86,7 +93,10 @@ const App = () => {
                     path="verifycurrentpassword"
                     element={<PasswordVerifyPage />}
                   />
-                  <Route path="resetpassword" element={<PasswordResetPage />} />
+                  <Route
+                    path="changepassword"
+                    element={<ChangePasswordPage />}
+                  />
                   <Route path="documentation" element={<DocumentationPage />} />
                   <Route path="batches/create" element={<CreateBatchPage />} />
                 </Route>

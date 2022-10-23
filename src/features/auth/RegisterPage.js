@@ -5,10 +5,13 @@ import { toast } from "react-toastify";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectCurrentToken } from "./authSlice";
+import useTitle from "../../common/hooks/useTitle";
 
 const RegisterPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  useTitle("Farm Diary | Sign Up");
+
   const from = location.state?.from?.pathname || "/login";
 
   const accessToken = useSelector(selectCurrentToken);
@@ -28,6 +31,12 @@ const RegisterPage = () => {
   const [validUsername, setValidUsername] = useState(Boolean);
   const [validPassword, setValidPassword] = useState(Boolean);
   const [validEmail, setValidEmail] = useState(Boolean);
+
+  const [fetchError, setFetchError] = useState("");
+
+  const [errors, setErrors] = useState({});
+
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     setValidUsername(USER_REGEX.test(formData.username));
@@ -52,15 +61,16 @@ const RegisterPage = () => {
     }
   }, [isSuccess, navigate, from]);
 
-  const [fetchError, setFetchError] = useState("");
-
-  const [errors, setErrors] = useState({});
-
   const handleChange = (e) => {
+    setFetchError("");
     const { name, value } = e.target;
     setFormData((prevData) => {
       return { ...prevData, [name]: value };
     });
+  };
+
+  const handleShowPassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const formIsValid = () => {
@@ -112,6 +122,8 @@ const RegisterPage = () => {
           validEmail={validEmail}
           validPassword={validPassword}
           validUsername={validUsername}
+          showPassword={showPassword}
+          handleShowPassword={handleShowPassword}
         />
       )}
     </div>

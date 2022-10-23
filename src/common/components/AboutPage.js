@@ -1,8 +1,11 @@
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import { Link } from "react-router-dom";
+import useTitle from "../hooks/useTitle";
 
 const AboutPage = () => {
+  useTitle("Farm Diary | About");
+
   return (
     <Grid item xs={12} md={12} mt={10} padding={4}>
       <Typography component="h6" variant="h6" color="gray">

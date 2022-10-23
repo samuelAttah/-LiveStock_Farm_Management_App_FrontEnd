@@ -1,13 +1,13 @@
-import React from "react";
-import Typography from "@mui/material/Typography";
-
 import CarouselComponent from "./common/components/CarouselComponent";
+import LandingPageInfo from "./common/components/LandingPageInfo";
+import useTitle from "./common/hooks/useTitle";
 
 const HomePage = () => {
+  useTitle("Farm Diary | Home");
   return (
     <>
       <CarouselComponent />
-      <Typography sx={{ color: "primary.main" }}>HomePage</Typography>
+      <LandingPageInfo />
     </>
   );
 };

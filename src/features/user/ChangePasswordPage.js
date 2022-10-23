@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useResetPasswordMutation } from "./userApiSlice";
-import PasswordResetPageExcerpt from "./PasswordResetPageExcerpt";
+import { useChangepasswordMutation } from "./userApiSlice";
+import ChangePasswordPageExcerpt from "./ChangePasswordPageExcerpt";
+import useTitle from "../../common/hooks/useTitle";
 
-const PasswordResetPage = () => {
+const ChangePasswordPage = () => {
+  useTitle("Farm Diary | Change Password");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -15,9 +17,13 @@ const PasswordResetPage = () => {
   const [errors, setErrors] = useState({});
   const [networkError, setNetworkError] = useState("");
 
+  //PASSWORDS VISIBILITY STATES
+  const [showPasswordOne, setShowPasswordOne] = useState(false);
+  const [showPasswordTwo, setShowPasswordTwo] = useState(false);
+
   //USING RTK CUSTOM HOOK FOR SUBMISSION
-  const [doReset, { isError, isLoading, error, isSuccess }] =
-    useResetPasswordMutation();
+  const [doChangePassword, { isError, isLoading, error, isSuccess }] =
+    useChangepasswordMutation();
 
   useEffect(() => {
     setMatchInput(passwordTwo === passwordOne);
@@ -68,6 +74,14 @@ const PasswordResetPage = () => {
 
   const canSave = [passwordOne, passwordTwo].every(Boolean);
 
+  const handleShowPasswordOne = () => {
+    setShowPasswordOne((prev) => !prev);
+  };
+
+  const handleShowPasswordTwo = () => {
+    setShowPasswordTwo((prev) => !prev);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formIsValid()) return;
@@ -79,14 +93,14 @@ const PasswordResetPage = () => {
       newPassword: passwordOne,
     };
     try {
-      await doReset(payLoad).unwrap();
+      await doChangePassword(payLoad).unwrap();
     } catch (error) {
       setNetworkError(error?.data?.message);
     }
   };
 
   return location?.state?.oldPassword ? (
-    <PasswordResetPageExcerpt
+    <ChangePasswordPageExcerpt
       passwordOne={passwordOne}
       passwordTwo={passwordTwo}
       handlePasswordOneChange={handlePasswordOneChange}
@@ -97,10 +111,14 @@ const PasswordResetPage = () => {
       networkError={networkError}
       canSave={canSave}
       isLoading={isLoading}
+      showPasswordOne={showPasswordOne}
+      handleShowPasswordOne={handleShowPasswordOne}
+      showPasswordTwo={showPasswordTwo}
+      handleShowPasswordTwo={handleShowPasswordTwo}
     />
   ) : (
     <Navigate to="/dashboard/verifycurrentpassword" />
   );
 };
 
-export default PasswordResetPage;
+export default ChangePasswordPage;
